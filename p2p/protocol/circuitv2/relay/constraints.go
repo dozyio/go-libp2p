@@ -23,13 +23,12 @@ var (
 
 // constraints implements various reservation constraints
 type constraints struct {
-	rc *Resources
-
-	mutex sync.Mutex
-	total []time.Time
+	rc    *Resources
 	peers map[peer.ID][]time.Time
 	ips   map[string][]time.Time
 	asns  map[uint32][]time.Time
+	total []time.Time
+	mutex sync.Mutex
 }
 
 // newConstraints creates a new constraints object.

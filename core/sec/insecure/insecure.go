@@ -112,9 +112,10 @@ func (t *Transport) ID() protocol.ID { return t.protocolID }
 // Conn is the connection type returned by the insecure transport.
 type Conn struct {
 	net.Conn
-
-	local, remote             peer.ID
-	localPubKey, remotePubKey ci.PubKey
+	localPubKey  ci.PubKey
+	remotePubKey ci.PubKey
+	local        peer.ID
+	remote       peer.ID
 }
 
 func makeExchangeMessage(pubkey ci.PubKey) (*pb.Exchange, error) {

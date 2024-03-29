@@ -61,25 +61,21 @@ func WithTLSClientConfig(c *tls.Config) Option {
 }
 
 type transport struct {
-	privKey ic.PrivKey
-	pid     peer.ID
-	clock   clock.Clock
-
-	connManager *quicreuse.ConnManager
-	rcmgr       network.ResourceManager
-	gater       connmgr.ConnectionGater
-
-	listenOnce     sync.Once
+	clock          clock.Clock
+	rcmgr          network.ResourceManager
+	gater          connmgr.ConnectionGater
+	privKey        ic.PrivKey
 	listenOnceErr  error
+	noise          *noise.Transport
+	connManager    *quicreuse.ConnManager
 	certManager    *certManager
-	hasCertManager atomic.Bool // set to true once the certManager is initialized
+	conns          map[uint64]*conn
 	staticTLSConf  *tls.Config
 	tlsClientConf  *tls.Config
-
-	noise *noise.Transport
-
-	connMx sync.Mutex
-	conns  map[uint64]*conn // using quic-go's ConnectionTracingKey as map key
+	pid            peer.ID
+	listenOnce     sync.Once
+	connMx         sync.Mutex
+	hasCertManager atomic.Bool
 }
 
 var _ tpt.Transport = &transport{}

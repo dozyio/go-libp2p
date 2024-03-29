@@ -20,30 +20,22 @@ var connCounter atomic.Int64
 // live connection between two peers.
 // it goes over a particular link.
 type conn struct {
-	notifLk sync.Mutex
-
-	id int64
-
-	local  peer.ID
-	remote peer.ID
-
-	localAddr  ma.Multiaddr
-	remoteAddr ma.Multiaddr
-
-	localPrivKey ic.PrivKey
+	localAddr    ma.Multiaddr
 	remotePubKey ic.PubKey
-
-	net     *peernet
-	link    *link
-	rconn   *conn // counterpart
-	streams list.List
-	stat    network.ConnStats
-
-	closeOnce sync.Once
-
-	isClosed atomic.Bool
-
+	localPrivKey ic.PrivKey
+	remoteAddr   ma.Multiaddr
+	net          *peernet
+	link         *link
+	rconn        *conn
+	stat         network.ConnStats
+	streams      list.List
+	remote       peer.ID
+	local        peer.ID
+	id           int64
 	sync.RWMutex
+	closeOnce sync.Once
+	notifLk   sync.Mutex
+	isClosed  atomic.Bool
 }
 
 func newConn(ln, rn *peernet, l *link, dir network.Direction) *conn {

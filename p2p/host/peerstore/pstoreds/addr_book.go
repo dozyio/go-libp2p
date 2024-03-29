@@ -40,8 +40,8 @@ var (
 
 // addrsRecord decorates the AddrBookRecord with locks and metadata.
 type addrsRecord struct {
-	sync.RWMutex
 	*pb.AddrBookRecord
+	sync.RWMutex
 	dirty bool
 }
 
@@ -134,19 +134,15 @@ func removeExpired(entries []*pb.AddrBookRecord_AddrEntry, now int64) []*pb.Addr
 // dsAddrBook is an address book backed by a Datastore with a GC procedure to purge expired entries. It uses an
 // in-memory address stream manager. See the NewAddrBook for more information.
 type dsAddrBook struct {
-	ctx  context.Context
-	opts Options
-
-	cache       cache[peer.ID, *addrsRecord]
-	ds          ds.Batching
-	gc          *dsAddrBookGc
-	subsManager *pstoremem.AddrSubManager
-
-	// controls children goroutine lifetime.
-	childrenDone sync.WaitGroup
+	opts         Options
+	ctx          context.Context
+	cache        cache[peer.ID, *addrsRecord]
+	ds           ds.Batching
+	clock        clock
+	gc           *dsAddrBookGc
+	subsManager  *pstoremem.AddrSubManager
 	cancelFn     func()
-
-	clock clock
+	childrenDone sync.WaitGroup
 }
 
 type clock interface {

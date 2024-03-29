@@ -84,17 +84,13 @@ const (
 )
 
 type WebRTCTransport struct {
-	webrtcConfig webrtc.Configuration
-	rcmgr        network.ResourceManager
-	gater        connmgr.ConnectionGater
-	privKey      ic.PrivKey
-	noiseTpt     *noise.Transport
-	localPeerId  peer.ID
-
-	// timeouts
+	rcmgr                  network.ResourceManager
+	gater                  connmgr.ConnectionGater
+	privKey                ic.PrivKey
+	noiseTpt               *noise.Transport
+	localPeerId            peer.ID
+	webrtcConfig           webrtc.Configuration
 	peerConnectionTimeouts iceTimeouts
-
-	// in-flight connections
 	maxInFlightConnections uint32
 }
 

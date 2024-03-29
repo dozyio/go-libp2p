@@ -67,14 +67,12 @@ var _ sec.SecureTransport = &SessionTransport{}
 // SessionTransport can be used
 // to provide per-connection options
 type SessionTransport struct {
-	t *Transport
-	// options
-	prologue           []byte
-	disablePeerIDCheck bool
-
-	protocolID protocol.ID
-
-	initiatorEarlyDataHandler, responderEarlyDataHandler EarlyDataHandler
+	initiatorEarlyDataHandler EarlyDataHandler
+	responderEarlyDataHandler EarlyDataHandler
+	t                         *Transport
+	protocolID                protocol.ID
+	prologue                  []byte
+	disablePeerIDCheck        bool
 }
 
 // SecureInbound runs the Noise handshake as the responder.

@@ -13,11 +13,10 @@ func newThreshold(cutoff int) *threshold {
 }
 
 type threshold struct {
-	mu   sync.Mutex
-	cond sync.Cond
-
+	cond      sync.Cond
 	count     int
 	threshold int
+	mu        sync.Mutex
 }
 
 // Acquire increments the counter. It will not block.

@@ -31,19 +31,16 @@ type resources struct {
 // goroutine.
 // If we didn't make this distinction we would have a double release problem in that case.
 type resourceScope struct {
+	owner   *resourceScope
+	trace   *trace
+	metrics *metrics
+	name    string
+	edges   []*resourceScope
+	rc      resources
+	refCnt  int
+	spanID  int
 	sync.Mutex
-	done   bool
-	refCnt int
-
-	spanID int
-
-	rc    resources
-	owner *resourceScope   // set in span scopes, which define trees
-	edges []*resourceScope // set in DAG scopes, it's the linearized parent set
-
-	name    string   // for debugging purposes
-	trace   *trace   // debug tracing
-	metrics *metrics // metrics collection
+	done bool
 }
 
 var _ network.ResourceScope = (*resourceScope)(nil)

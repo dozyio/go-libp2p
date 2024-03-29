@@ -15,21 +15,21 @@ import (
 
 // basicBus is a type-based event delivery system
 type basicBus struct {
-	lk            sync.RWMutex
+	metricsTracer MetricsTracer
 	nodes         map[reflect.Type]*node
 	wildcard      *wildcardNode
-	metricsTracer MetricsTracer
+	lk            sync.RWMutex
 }
 
 var _ event.Bus = (*basicBus)(nil)
 
 type emitter struct {
+	typ           reflect.Type
+	metricsTracer MetricsTracer
 	n             *node
 	w             *wildcardNode
-	typ           reflect.Type
-	closed        atomic.Bool
 	dropper       func(reflect.Type)
-	metricsTracer MetricsTracer
+	closed        atomic.Bool
 }
 
 func (e *emitter) Emit(evt interface{}) error {
@@ -135,16 +135,16 @@ func (w *wildcardSub) Name() string {
 }
 
 type namedSink struct {
-	name string
 	ch   chan interface{}
+	name string
 }
 
 type sub struct {
-	ch            chan interface{}
-	nodes         []*node
-	dropper       func(reflect.Type)
 	metricsTracer MetricsTracer
+	ch            chan interface{}
+	dropper       func(reflect.Type)
 	name          string
+	nodes         []*node
 }
 
 func (s *sub) Name() string {
@@ -318,10 +318,10 @@ func (b *basicBus) GetAllEventTypes() []reflect.Type {
 // NODE
 
 type wildcardNode struct {
-	sync.RWMutex
-	nSinks        atomic.Int32
-	sinks         []*namedSink
 	metricsTracer MetricsTracer
+	sinks         []*namedSink
+	sync.RWMutex
+	nSinks atomic.Int32
 }
 
 func (n *wildcardNode) addSink(sink *namedSink) {
@@ -366,19 +366,13 @@ func (n *wildcardNode) emit(evt interface{}) {
 }
 
 type node struct {
-	// Note: make sure to NEVER lock basicBus.lk when this lock is held
-	lk sync.Mutex
-
-	typ reflect.Type
-
-	// emitter ref count
-	nEmitters atomic.Int32
-
-	keepLast bool
-	last     interface{}
-
-	sinks         []*namedSink
+	typ           reflect.Type
+	last          interface{}
 	metricsTracer MetricsTracer
+	sinks         []*namedSink
+	lk            sync.Mutex
+	nEmitters     atomic.Int32
+	keepLast      bool
 }
 
 func newNode(typ reflect.Type, metricsTracer MetricsTracer) *node {

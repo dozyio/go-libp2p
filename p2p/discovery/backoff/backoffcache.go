@@ -14,15 +14,13 @@ import (
 
 // BackoffDiscovery is an implementation of discovery that caches peer data and attenuates repeated queries
 type BackoffDiscovery struct {
-	disc         discovery.Discovery
-	stratFactory BackoffFactory
-	peerCache    map[string]*backoffCache
-	peerCacheMux sync.RWMutex
-
+	disc          discovery.Discovery
+	clock         clock
+	stratFactory  BackoffFactory
+	peerCache     map[string]*backoffCache
 	parallelBufSz int
 	returnedBufSz int
-
-	clock clock
+	peerCacheMux  sync.RWMutex
 }
 
 type BackoffDiscoveryOption func(*BackoffDiscovery) error
@@ -83,17 +81,14 @@ func (c realClock) Now() time.Time {
 }
 
 type backoffCache struct {
-	// strat is assigned on creation and not written to
-	strat BackoffStrategy
-
-	mux          sync.Mutex // guards writes to all following fields
 	nextDiscover time.Time
+	strat        BackoffStrategy
+	clock        clock
 	prevPeers    map[peer.ID]peer.AddrInfo
 	peers        map[peer.ID]peer.AddrInfo
 	sendingChs   map[chan peer.AddrInfo]int
+	mux          sync.Mutex
 	ongoing      bool
-
-	clock clock
 }
 
 func (d *BackoffDiscovery) Advertise(ctx context.Context, ns string, opts ...discovery.Option) (time.Duration, error) {

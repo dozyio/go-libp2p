@@ -58,15 +58,16 @@ func initMetrics() {
 }
 
 type aggregatingCollector struct {
-	cronOnce sync.Once
-
-	mutex                sync.Mutex
-	highestID            uint64
-	conns                map[uint64] /* id */ *tracingConn
-	rtts                 prometheus.Histogram
-	connDurations        prometheus.Histogram
-	segsSent, segsRcvd   uint64
-	bytesSent, bytesRcvd uint64
+	rtts          prometheus.Histogram
+	connDurations prometheus.Histogram
+	conns         map[uint64]*tracingConn
+	highestID     uint64
+	segsSent      uint64
+	segsRcvd      uint64
+	bytesSent     uint64
+	bytesRcvd     uint64
+	cronOnce      sync.Once
+	mutex         sync.Mutex
 }
 
 var _ prometheus.Collector = &aggregatingCollector{}
@@ -202,13 +203,11 @@ func (c *aggregatingCollector) ClosedConn(conn *tracingConn, direction string) {
 }
 
 type tracingConn struct {
-	id uint64
-
 	startTime time.Time
-	isClient  bool
-
 	manet.Conn
-	tcpConn *tcp.Conn
+	tcpConn  *tcp.Conn
+	id       uint64
+	isClient bool
 }
 
 func newTracingConn(c manet.Conn, isClient bool) (*tracingConn, error) {

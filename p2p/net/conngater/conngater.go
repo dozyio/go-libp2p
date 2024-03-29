@@ -22,13 +22,11 @@ import (
 // BasicConnectionGater implements a connection gater that allows the application to perform
 // access control on incoming and outgoing connections.
 type BasicConnectionGater struct {
-	sync.RWMutex
-
+	ds             datastore.Datastore
 	blockedPeers   map[peer.ID]struct{}
 	blockedAddrs   map[string]struct{}
 	blockedSubnets map[string]*net.IPNet
-
-	ds datastore.Datastore
+	sync.RWMutex
 }
 
 var log = logging.Logger("net/conngater")

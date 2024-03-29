@@ -42,8 +42,8 @@ func WithAcceptTimeout(t time.Duration) Option {
 }
 
 type StreamMuxer struct {
-	ID    protocol.ID
 	Muxer network.Multiplexer
+	ID    protocol.ID
 }
 
 // Upgrader is a multistream upgrader that can upgrade an underlying connection
@@ -269,8 +269,8 @@ func (u *upgrader) setupMuxer(ctx context.Context, conn sec.SecureConn, server b
 
 	type result struct {
 		smconn  network.MuxedConn
-		muxerID protocol.ID
 		err     error
+		muxerID protocol.ID
 	}
 
 	done := make(chan result, 1)
@@ -308,8 +308,8 @@ func (u *upgrader) getSecurityByID(id protocol.ID) sec.SecureTransport {
 
 func (u *upgrader) negotiateSecurity(ctx context.Context, insecure net.Conn, server bool) (sec.SecureTransport, error) {
 	type result struct {
-		proto protocol.ID
 		err   error
+		proto protocol.ID
 	}
 
 	done := make(chan result, 1)

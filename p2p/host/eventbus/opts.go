@@ -8,8 +8,8 @@ import (
 )
 
 type subSettings struct {
-	buffer int
 	name   string
+	buffer int
 }
 
 var subCnt atomic.Int64

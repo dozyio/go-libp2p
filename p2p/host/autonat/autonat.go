@@ -23,40 +23,29 @@ const maxConfidence = 3
 
 // AmbientAutoNAT is the implementation of ambient NAT autodiscovery
 type AmbientAutoNAT struct {
-	host host.Host
-
-	*config
-
-	ctx               context.Context
-	ctxCancel         context.CancelFunc // is closed when Close is called
-	backgroundRunning chan struct{}      // is closed when the background go routine exits
-
-	inboundConn   chan network.Conn
-	dialResponses chan error
-	// status is an autoNATResult reflecting current status.
-	status atomic.Pointer[network.Reachability]
-	// Reflects the confidence on of the NATStatus being private, as a single
-	// dialback may fail for reasons unrelated to NAT.
-	// If it is <3, then multiple autoNAT peers may be contacted for dialback
-	// If only a single autoNAT peer is known, then the confidence increases
-	// for each failure until it reaches 3.
-	confidence   int
-	lastInbound  time.Time
-	lastProbeTry time.Time
-	lastProbe    time.Time
-	recentProbes map[peer.ID]time.Time
-
-	service *autoNATService
-
-	emitReachabilityChanged event.Emitter
+	lastInbound             time.Time
+	lastProbe               time.Time
+	lastProbeTry            time.Time
 	subscriber              event.Subscription
+	ctx                     context.Context
+	emitReachabilityChanged event.Emitter
+	host                    host.Host
+	recentProbes            map[peer.ID]time.Time
+	status                  atomic.Pointer[network.Reachability]
+	dialResponses           chan error
+	inboundConn             chan network.Conn
+	backgroundRunning       chan struct{}
+	service                 *autoNATService
+	ctxCancel               context.CancelFunc
+	*config
+	confidence int
 }
 
 // StaticAutoNAT is a simple AutoNAT implementation when a single NAT status is desired.
 type StaticAutoNAT struct {
 	host         host.Host
-	reachability network.Reachability
 	service      *autoNATService
+	reachability network.Reachability
 }
 
 // New creates a new NAT autodiscovery system attached to a host

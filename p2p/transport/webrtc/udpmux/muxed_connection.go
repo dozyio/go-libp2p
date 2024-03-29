@@ -10,8 +10,8 @@ import (
 )
 
 type packet struct {
-	buf  []byte
 	addr net.Addr
+	buf  []byte
 }
 
 var _ net.PacketConn = &muxedConnection{}

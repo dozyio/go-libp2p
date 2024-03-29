@@ -20,34 +20,18 @@ var ReserveTimeout = time.Minute
 
 // Reservation is a struct carrying information about a relay/v2 slot reservation.
 type Reservation struct {
-	// Expiration is the expiration time of the reservation
-	Expiration time.Time
-	// Addrs contains the vouched public addresses of the reserving peer, which can be
-	// announced to the network
-	Addrs []ma.Multiaddr
-
-	// LimitDuration is the time limit for which the relay will keep a relayed connection
-	// open. If 0, there is no limit.
+	Expiration    time.Time
+	Voucher       *proto.ReservationVoucher
+	Addrs         []ma.Multiaddr
 	LimitDuration time.Duration
-	// LimitData is the number of bytes that the relay will relay in each direction before
-	// resetting a relayed connection.
-	LimitData uint64
-
-	// Voucher is a signed reservation voucher provided by the relay
-	Voucher *proto.ReservationVoucher
+	LimitData     uint64
 }
 
 // ReservationError is the error returned on failure to reserve a slot in the relay
 type ReservationError struct {
-
-	// Status is the status returned by the relay for rejecting the reservation
-	// request. It is set to pbv2.Status_CONNECTION_FAILED on other failures
-	Status pbv2.Status
-
-	// Reason is the reason for reservation failure
+	err    error
 	Reason string
-
-	err error
+	Status pbv2.Status
 }
 
 func (re ReservationError) Error() string {

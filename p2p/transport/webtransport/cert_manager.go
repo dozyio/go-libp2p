@@ -46,18 +46,16 @@ func newCertConfig(key ic.PrivKey, start, end time.Time) (*certConfig, error) {
 //  2. Once we reach 1h before expiry of the first certificate, we switch over to the second certificate.
 //     At the same time, we stop advertising the certhash of the first cert and generate the next cert.
 type certManager struct {
-	clock     clock.Clock
-	ctx       context.Context
-	ctxCancel context.CancelFunc
-	refCount  sync.WaitGroup
-
-	mx            sync.RWMutex
-	lastConfig    *certConfig // initially nil
-	currentConfig *certConfig
-	nextConfig    *certConfig // nil until we have passed half the certValidity of the current config
-	addrComp      ma.Multiaddr
-
+	clock                clock.Clock
+	ctx                  context.Context
+	addrComp             ma.Multiaddr
+	ctxCancel            context.CancelFunc
+	lastConfig           *certConfig
+	currentConfig        *certConfig
+	nextConfig           *certConfig
 	serializedCertHashes [][]byte
+	refCount             sync.WaitGroup
+	mx                   sync.RWMutex
 }
 
 func newCertManager(hostKey ic.PrivKey, clock clock.Clock) (*certManager, error) {

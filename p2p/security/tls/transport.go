@@ -25,12 +25,11 @@ const ID = "/tls/1.0.0"
 
 // Transport constructs secure communication sessions for a peer.
 type Transport struct {
-	identity *Identity
-
-	localPeer  peer.ID
 	privKey    ci.PrivKey
-	muxers     []protocol.ID
+	identity   *Identity
+	localPeer  peer.ID
 	protocolID protocol.ID
+	muxers     []protocol.ID
 }
 
 var _ sec.SecureTransport = &Transport{}

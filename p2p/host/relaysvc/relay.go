@@ -12,14 +12,12 @@ import (
 )
 
 type RelayManager struct {
-	host host.Host
-
-	mutex sync.Mutex
-	relay *relayv2.Relay
-	opts  []relayv2.Option
-
-	refCount  sync.WaitGroup
+	host      host.Host
+	relay     *relayv2.Relay
 	ctxCancel context.CancelFunc
+	opts      []relayv2.Option
+	refCount  sync.WaitGroup
+	mutex     sync.Mutex
 }
 
 func NewRelayManager(host host.Host, opts ...relayv2.Option) *RelayManager {

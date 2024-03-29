@@ -19,10 +19,9 @@ import (
 
 type tconn struct {
 	network.Conn
-
-	peer             peer.ID
-	closed           uint32 // to be used atomically. Closed if 1
 	disconnectNotify func(net network.Network, conn network.Conn)
+	peer             peer.ID
+	closed           uint32
 }
 
 func (c *tconn) Close() error {

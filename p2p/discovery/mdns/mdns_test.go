@@ -26,8 +26,8 @@ func setupMDNS(t *testing.T, notifee Notifee) peer.ID {
 }
 
 type notif struct {
-	mutex sync.Mutex
 	infos []peer.AddrInfo
+	mutex sync.Mutex
 }
 
 var _ Notifee = &notif{}

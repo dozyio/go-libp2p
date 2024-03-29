@@ -10,8 +10,8 @@ import (
 )
 
 type protoSegment struct {
-	sync.RWMutex
 	protocols map[peer.ID]map[protocol.ID]struct{}
+	sync.RWMutex
 }
 
 type protoSegments [256]*protoSegment
@@ -23,12 +23,10 @@ func (s *protoSegments) get(p peer.ID) *protoSegment {
 var errTooManyProtocols = errors.New("too many protocols")
 
 type memoryProtoBook struct {
-	segments protoSegments
-
+	segments  protoSegments
+	interned  map[protocol.ID]protocol.ID
 	maxProtos int
-
-	lk       sync.RWMutex
-	interned map[protocol.ID]protocol.ID
+	lk        sync.RWMutex
 }
 
 var _ pstore.ProtoBook = (*memoryProtoBook)(nil)

@@ -37,28 +37,22 @@ type dataChannel struct {
 }
 
 type connection struct {
-	pc        *webrtc.PeerConnection
-	transport *WebRTCTransport
-	scope     network.ConnManagementScope
-
-	closeOnce sync.Once
-	closeErr  error
-
-	localPeer      peer.ID
-	localMultiaddr ma.Multiaddr
-
-	remotePeer      peer.ID
 	remoteKey       ic.PubKey
+	localMultiaddr  ma.Multiaddr
+	scope           network.ConnManagementScope
+	ctx             context.Context
 	remoteMultiaddr ma.Multiaddr
-
-	m            sync.Mutex
-	streams      map[uint16]*stream
-	nextStreamID atomic.Int32
-
-	acceptQueue chan dataChannel
-
-	ctx    context.Context
-	cancel context.CancelFunc
+	closeErr        error
+	pc              *webrtc.PeerConnection
+	transport       *WebRTCTransport
+	streams         map[uint16]*stream
+	acceptQueue     chan dataChannel
+	cancel          context.CancelFunc
+	localPeer       peer.ID
+	remotePeer      peer.ID
+	closeOnce       sync.Once
+	m               sync.Mutex
+	nextStreamID    atomic.Int32
 }
 
 func newConnection(

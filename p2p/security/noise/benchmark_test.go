@@ -104,8 +104,8 @@ func drain(r io.Reader, done chan<- error, writeTo io.Writer) {
 }
 
 type discardWithBuffer struct {
-	buf []byte
 	io.Writer
+	buf []byte
 }
 
 func (d *discardWithBuffer) ReadFrom(r io.Reader) (n int64, err error) {
@@ -177,7 +177,7 @@ func benchDataTransfer(b *benchenv, dataSize int64, m testMode) {
 		case readBufferLtPlainText:
 			rbuf = make([]byte, len(plainTextBufs[i])-2)
 		}
-		writeTos[i] = &discardWithBuffer{rbuf, io.Discard}
+		writeTos[i] = &discardWithBuffer{io.Discard, rbuf}
 	}
 
 	b.ResetTimer()

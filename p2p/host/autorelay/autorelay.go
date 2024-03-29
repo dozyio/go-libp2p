@@ -18,21 +18,16 @@ import (
 var log = logging.Logger("autorelay")
 
 type AutoRelay struct {
-	refCount  sync.WaitGroup
-	ctx       context.Context
-	ctxCancel context.CancelFunc
-
-	conf *config
-
-	mx     sync.Mutex
-	status network.Reachability
-
-	relayFinder *relayFinder
-
-	host   host.Host
-	addrsF basic.AddrsFactory
-
+	ctx           context.Context
+	host          host.Host
 	metricsTracer MetricsTracer
+	ctxCancel     context.CancelFunc
+	conf          *config
+	relayFinder   *relayFinder
+	addrsF        basic.AddrsFactory
+	refCount      sync.WaitGroup
+	status        network.Reachability
+	mx            sync.Mutex
 }
 
 func NewAutoRelay(bhost *basic.BasicHost, opts ...Option) (*AutoRelay, error) {

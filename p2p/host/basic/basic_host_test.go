@@ -775,8 +775,8 @@ func updatedAddrsEqual(a, b []event.UpdatedAddress) bool {
 	// for equality. So we convert to this little struct, which
 	// stores the multiaddr as a string.
 	type ua struct {
-		action  event.AddrAction
 		addrStr string
+		action  event.AddrAction
 	}
 	aSet := make(map[ua]struct{})
 	for _, addr := range a {

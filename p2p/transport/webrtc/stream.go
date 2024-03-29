@@ -65,37 +65,22 @@ const (
 // Package pion detached data channel into a net.Conn
 // and then a network.MuxedStream
 type stream struct {
-	mx sync.Mutex
-
-	// readerMx ensures that only a single goroutine reads from the reader. Read is not threadsafe
-	// But we may need to read from reader for control messages from a different goroutine.
-	readerMx sync.Mutex
-	reader   pbio.Reader
-
-	// this buffer is limited up to a single message. Reason we need it
-	// is because a reader might read a message midway, and so we need a
-	// wait to buffer that for as long as the remaining part is not (yet) read
-	nextMessage  *pb.Message
-	receiveState receiveState
-
-	writer            pbio.Writer // concurrent writes prevented by mx
-	writeStateChanged chan struct{}
-	sendState         sendState
-	writeDeadline     time.Time
-
-	controlMessageReaderOnce sync.Once
-	// controlMessageReaderEndTime is the end time for reading FIN_ACK from the control
-	// message reader. We cannot rely on SetReadDeadline to do this since that is prone to
-	// race condition where a previous deadline timer fires after the latest call to
-	// SetReadDeadline
-	// See: https://github.com/pion/sctp/pull/290
 	controlMessageReaderEndTime time.Time
-
-	onDoneOnce          sync.Once
-	onDone              func()
-	id                  uint16 // for logging purposes
-	dataChannel         *datachannel.DataChannel
-	closeForShutdownErr error
+	writeDeadline               time.Time
+	writer                      pbio.Writer
+	closeForShutdownErr         error
+	reader                      pbio.Reader
+	onDone                      func()
+	writeStateChanged           chan struct{}
+	nextMessage                 *pb.Message
+	dataChannel                 *datachannel.DataChannel
+	controlMessageReaderOnce    sync.Once
+	onDoneOnce                  sync.Once
+	mx                          sync.Mutex
+	readerMx                    sync.Mutex
+	id                          uint16
+	sendState                   sendState
+	receiveState                receiveState
 }
 
 var _ network.MuxedStream = &stream{}

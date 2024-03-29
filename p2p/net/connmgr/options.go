@@ -9,13 +9,13 @@ import (
 
 // config is the configuration struct for the basic connection manager.
 type config struct {
+	clock         clock.Clock
+	decayer       *DecayerCfg
 	highWater     int
 	lowWater      int
 	gracePeriod   time.Duration
 	silencePeriod time.Duration
-	decayer       *DecayerCfg
 	emergencyTrim bool
-	clock         clock.Clock
 }
 
 // Option represents an option for the basic connection manager.

@@ -26,19 +26,12 @@ var blackholeIP6 = net.ParseIP("100::")
 
 // mocknet implements mocknet.Mocknet
 type mocknet struct {
-	nets  map[peer.ID]*peernet
-	hosts map[peer.ID]host.Host
-
-	// links make it possible to connect two peers.
-	// think of links as the physical medium.
-	// usually only one, but there could be multiple
-	// **links are shared between peers**
-	links map[peer.ID]map[peer.ID]map[*link]struct{}
-
+	ctx          context.Context
+	nets         map[peer.ID]*peernet
+	hosts        map[peer.ID]host.Host
+	links        map[peer.ID]map[peer.ID]map[*link]struct{}
+	ctxCancel    context.CancelFunc
 	linkDefaults LinkOptions
-
-	ctxCancel context.CancelFunc
-	ctx       context.Context
 	sync.Mutex
 }
 

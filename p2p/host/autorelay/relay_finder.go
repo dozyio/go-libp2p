@@ -40,47 +40,32 @@ const (
 
 type candidate struct {
 	added           time.Time
-	supportsRelayV2 bool
 	ai              peer.AddrInfo
+	supportsRelayV2 bool
 }
 
 // relayFinder is a Host that uses relays for connectivity when a NAT is detected.
 type relayFinder struct {
-	bootTime time.Time
-	host     *basic.BasicHost
-
-	conf *config
-
-	refCount sync.WaitGroup
-
-	ctxCancel   context.CancelFunc
-	ctxCancelMx sync.Mutex
-
-	peerSource PeerSource
-
-	candidateFound             chan struct{} // receives every time we find a new relay candidate
-	candidateMx                sync.Mutex
+	bootTime                   time.Time
+	cachedAddrsExpiry          time.Time
+	metricsTracer              MetricsTracer
+	relays                     map[peer.ID]*circuitv2.Reservation
+	ctxCancel                  context.CancelFunc
+	host                       *basic.BasicHost
+	peerSource                 PeerSource
+	candidateFound             chan struct{}
+	triggerRunScheduledWork    chan struct{}
 	candidates                 map[peer.ID]*candidate
 	backoff                    map[peer.ID]time.Time
-	maybeConnectToRelayTrigger chan struct{} // cap: 1
-	// Any time _something_ happens that might cause us to need new candidates.
-	// This could be
-	// * the disconnection of a relay
-	// * the failed attempt to obtain a reservation with a current candidate
-	// * a candidate is deleted due to its age
-	maybeRequestNewCandidates chan struct{} // cap: 1.
-
-	relayUpdated chan struct{}
-
-	relayMx sync.Mutex
-	relays  map[peer.ID]*circuitv2.Reservation
-
-	cachedAddrs       []ma.Multiaddr
-	cachedAddrsExpiry time.Time
-
-	// A channel that triggers a run of `runScheduledWork`.
-	triggerRunScheduledWork chan struct{}
-	metricsTracer           MetricsTracer
+	maybeConnectToRelayTrigger chan struct{}
+	maybeRequestNewCandidates  chan struct{}
+	relayUpdated               chan struct{}
+	conf                       *config
+	cachedAddrs                []ma.Multiaddr
+	refCount                   sync.WaitGroup
+	relayMx                    sync.Mutex
+	candidateMx                sync.Mutex
+	ctxCancelMx                sync.Mutex
 }
 
 var errAlreadyRunning = errors.New("relayFinder already running")
@@ -108,11 +93,11 @@ func newRelayFinder(host *basic.BasicHost, peerSource PeerSource, conf *config) 
 }
 
 type scheduledWorkTimes struct {
-	leastFrequentInterval       time.Duration
 	nextRefresh                 time.Time
 	nextBackoff                 time.Time
 	nextOldCandidateCheck       time.Time
 	nextAllowedCallToPeerSource time.Time
+	leastFrequentInterval       time.Duration
 }
 
 func (rf *relayFinder) background(ctx context.Context) {

@@ -10,9 +10,9 @@ import (
 )
 
 type memoryKeyBook struct {
-	sync.RWMutex // same lock. wont happen a ton.
-	pks          map[peer.ID]ic.PubKey
-	sks          map[peer.ID]ic.PrivKey
+	pks map[peer.ID]ic.PubKey
+	sks map[peer.ID]ic.PrivKey
+	sync.RWMutex
 }
 
 var _ pstore.KeyBook = (*memoryKeyBook)(nil)

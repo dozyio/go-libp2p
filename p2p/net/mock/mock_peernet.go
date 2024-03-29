@@ -17,28 +17,17 @@ import (
 
 // peernet implements network.Network
 type peernet struct {
-	mocknet *mocknet // parent
-
-	peer    peer.ID
-	ps      peerstore.Peerstore
-	emitter event.Emitter
-
-	// conns are actual live connections between peers.
-	// many conns could run over each link.
-	// **conns are NOT shared between peers**
-	connsByPeer map[peer.ID]map[*conn]struct{}
-	connsByLink map[*link]map[*conn]struct{}
-
-	// connection gater to check before dialing or accepting connections. May be nil to allow all.
-	gater connmgr.ConnectionGater
-
-	// implement network.Network
+	ps            peerstore.Peerstore
+	emitter       event.Emitter
+	gater         connmgr.ConnectionGater
+	mocknet       *mocknet
+	connsByPeer   map[peer.ID]map[*conn]struct{}
+	connsByLink   map[*link]map[*conn]struct{}
 	streamHandler network.StreamHandler
-
-	notifmu sync.Mutex
-	notifs  map[network.Notifiee]struct{}
-
+	notifs        map[network.Notifiee]struct{}
+	peer          peer.ID
 	sync.RWMutex
+	notifmu sync.Mutex
 }
 
 // newPeernet constructs a new peernet

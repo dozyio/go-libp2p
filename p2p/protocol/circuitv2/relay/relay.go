@@ -42,24 +42,20 @@ var log = logging.Logger("relay")
 
 // Relay is the (limited) relay service object.
 type Relay struct {
-	ctx    context.Context
-	cancel func()
-
-	host        host.Host
-	rc          Resources
-	acl         ACLFilter
-	constraints *constraints
-	scope       network.ResourceScopeSpan
-	notifiee    network.Notifiee
-
-	mx     sync.Mutex
-	rsvp   map[peer.ID]time.Time
-	conns  map[peer.ID]int
-	closed bool
-
-	selfAddr ma.Multiaddr
-
+	notifiee      network.Notifiee
 	metricsTracer MetricsTracer
+	host          host.Host
+	selfAddr      ma.Multiaddr
+	acl           ACLFilter
+	ctx           context.Context
+	scope         network.ResourceScopeSpan
+	rsvp          map[peer.ID]time.Time
+	constraints   *constraints
+	conns         map[peer.ID]int
+	cancel        func()
+	rc            Resources
+	mx            sync.Mutex
+	closed        bool
 }
 
 // New constructs a new limited relay that can provide relay services in the given host.

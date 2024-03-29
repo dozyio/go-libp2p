@@ -160,12 +160,8 @@ func (k DialUpdateKind) String() string {
 
 // DialUpdate is used by DialUpdater to provide dial updates.
 type DialUpdate struct {
-	// Kind is the kind of update event.
-	Kind DialUpdateKind
-	// Addr is the peer's address.
 	Addr ma.Multiaddr
-	// Conn is the resulting connection on success.
 	Conn CapableConn
-	// Err is the reason for dial failure.
-	Err error
+	Err  error
+	Kind DialUpdateKind
 }

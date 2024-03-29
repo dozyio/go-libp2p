@@ -17,46 +17,39 @@ var DefaultResolution = 1 * time.Minute
 
 // bumpCmd represents a bump command.
 type bumpCmd struct {
-	peer  peer.ID
 	tag   *decayingTag
+	peer  peer.ID
 	delta int
 }
 
 // removeCmd represents a tag removal command.
 type removeCmd struct {
-	peer peer.ID
 	tag  *decayingTag
+	peer peer.ID
 }
 
 // decayer tracks and manages all decaying tags and their values.
 type decayer struct {
-	cfg   *DecayerCfg
-	mgr   *BasicConnMgr
-	clock clock.Clock // for testing.
-
-	tagsMu    sync.Mutex
-	knownTags map[string]*decayingTag
-
-	// lastTick stores the last time the decayer ticked. Guarded by atomic.
-	lastTick atomic.Pointer[time.Time]
-
-	// bumpTagCh queues bump commands to be processed by the loop.
+	clock       clock.Clock
+	err         error
+	cfg         *DecayerCfg
+	mgr         *BasicConnMgr
+	knownTags   map[string]*decayingTag
+	lastTick    atomic.Pointer[time.Time]
 	bumpTagCh   chan bumpCmd
 	removeTagCh chan removeCmd
 	closeTagCh  chan *decayingTag
-
-	// closure thingies.
-	closeCh chan struct{}
-	doneCh  chan struct{}
-	err     error
+	closeCh     chan struct{}
+	doneCh      chan struct{}
+	tagsMu      sync.Mutex
 }
 
 var _ connmgr.Decayer = (*decayer)(nil)
 
 // DecayerCfg is the configuration object for the Decayer.
 type DecayerCfg struct {
-	Resolution time.Duration
 	Clock      clock.Clock
+	Resolution time.Duration
 }
 
 // WithDefaults writes the default values on this DecayerConfig instance,
@@ -284,16 +277,13 @@ func (d *decayer) process() {
 // decayingTag represents a decaying tag, with an associated decay interval, a
 // decay function, and a bump function.
 type decayingTag struct {
-	trkr     *decayer
-	name     string
-	interval time.Duration
 	nextTick time.Time
+	trkr     *decayer
 	decayFn  connmgr.DecayFn
 	bumpFn   connmgr.BumpFn
-
-	// closed marks this tag as closed, so that if it's bumped after being
-	// closed, we can return an error.
-	closed atomic.Bool
+	name     string
+	interval time.Duration
+	closed   atomic.Bool
 }
 
 var _ connmgr.DecayingTag = (*decayingTag)(nil)

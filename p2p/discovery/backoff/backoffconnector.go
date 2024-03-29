@@ -13,10 +13,10 @@ import (
 
 // BackoffConnector is a utility to connect to peers, but only if we have not recently tried connecting to them already
 type BackoffConnector struct {
-	cache      *lru.TwoQueueCache[peer.ID, *connCacheData]
 	host       host.Host
-	connTryDur time.Duration
+	cache      *lru.TwoQueueCache[peer.ID, *connCacheData]
 	backoff    BackoffFactory
+	connTryDur time.Duration
 	mux        sync.Mutex
 }
 

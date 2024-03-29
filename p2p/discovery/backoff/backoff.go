@@ -44,9 +44,9 @@ func NoJitter(duration, min, max time.Duration, rng *rand.Rand) time.Duration {
 }
 
 type randomizedBackoff struct {
+	rng *rand.Rand
 	min time.Duration
 	max time.Duration
-	rng *rand.Rand
 }
 
 func (b *randomizedBackoff) BoundedDelay(duration time.Duration) time.Duration {
@@ -64,9 +64,9 @@ func boundedDuration(d, min, max time.Duration) time.Duration {
 }
 
 type attemptBackoff struct {
-	attempt int
-	jitter  Jitter
 	randomizedBackoff
+	jitter  Jitter
+	attempt int
 }
 
 func (b *attemptBackoff) Reset() {
@@ -115,8 +115,8 @@ func NewPolynomialBackoff(min, max time.Duration, jitter Jitter,
 
 type polynomialBackoff struct {
 	attemptBackoff
-	timeUnits time.Duration
 	poly      []float64
+	timeUnits time.Duration
 }
 
 func (b *polynomialBackoff) Delay() time.Duration {
@@ -214,8 +214,8 @@ func (b *exponentialDecorrelatedJitter) Delay() time.Duration {
 func (b *exponentialDecorrelatedJitter) Reset() { b.lastDelay = 0 }
 
 type lockedSource struct {
-	lk  sync.Mutex
 	src rand.Source
+	lk  sync.Mutex
 }
 
 func (r *lockedSource) Int63() (n int64) {

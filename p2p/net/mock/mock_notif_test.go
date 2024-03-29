@@ -174,8 +174,8 @@ type netNotifiee struct {
 	disconnected chan network.Conn
 
 	streamState struct {
-		sync.Mutex
 		m map[network.Stream]chan struct{}
+		sync.Mutex
 	}
 }
 

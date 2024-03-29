@@ -16,22 +16,19 @@ import (
 type ConnManager struct {
 	reuseUDP4       *reuse
 	reuseUDP6       *reuse
+	serverConfig    *quic.Config
+	clientConfig    *quic.Config
+	quicListeners   map[string]quicListenerEntry
+	quicListenersMu sync.Mutex
+	srk             quic.StatelessResetKey
+	tokenKey        quic.TokenGeneratorKey
 	enableReuseport bool
 	enableMetrics   bool
-
-	serverConfig *quic.Config
-	clientConfig *quic.Config
-
-	quicListenersMu sync.Mutex
-	quicListeners   map[string]quicListenerEntry
-
-	srk      quic.StatelessResetKey
-	tokenKey quic.TokenGeneratorKey
 }
 
 type quicListenerEntry struct {
-	refCount int
 	ln       *quicListener
+	refCount int
 }
 
 func NewConnManager(statelessResetKey quic.StatelessResetKey, tokenKey quic.TokenGeneratorKey, opts ...Option) (*ConnManager, error) {

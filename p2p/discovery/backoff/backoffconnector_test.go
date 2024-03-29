@@ -17,10 +17,9 @@ import (
 
 type maxDialHost struct {
 	host.Host
-
-	mux            sync.Mutex
 	timesDialed    map[peer.ID]int
 	maxTimesToDial map[peer.ID]int
+	mux            sync.Mutex
 }
 
 func (h *maxDialHost) Connect(ctx context.Context, ai peer.AddrInfo) error {

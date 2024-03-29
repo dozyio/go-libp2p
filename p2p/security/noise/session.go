@@ -16,35 +16,25 @@ import (
 )
 
 type secureSession struct {
-	initiator   bool
-	checkPeerID bool
-
-	localID   peer.ID
-	localKey  crypto.PrivKey
-	remoteID  peer.ID
-	remoteKey crypto.PubKey
-
-	readLock  sync.Mutex
-	writeLock sync.Mutex
-
-	insecureConn   net.Conn
-	insecureReader *bufio.Reader // to cushion io read syscalls
-	// we don't buffer writes to avoid introducing latency; optimisation possible. // TODO revisit
-
-	qseek int     // queued bytes seek value.
-	qbuf  []byte  // queued bytes buffer.
-	rlen  [2]byte // work buffer to read in the incoming message length.
-
-	enc *noise.CipherState
-	dec *noise.CipherState
-
-	// noise prologue
-	prologue []byte
-
-	initiatorEarlyDataHandler, responderEarlyDataHandler EarlyDataHandler
-
-	// ConnectionState holds state information releated to the secureSession entity.
-	connectionState network.ConnectionState
+	insecureConn              net.Conn
+	responderEarlyDataHandler EarlyDataHandler
+	initiatorEarlyDataHandler EarlyDataHandler
+	localKey                  crypto.PrivKey
+	remoteKey                 crypto.PubKey
+	dec                       *noise.CipherState
+	enc                       *noise.CipherState
+	insecureReader            *bufio.Reader
+	remoteID                  peer.ID
+	localID                   peer.ID
+	connectionState           network.ConnectionState
+	qbuf                      []byte
+	prologue                  []byte
+	qseek                     int
+	writeLock                 sync.Mutex
+	readLock                  sync.Mutex
+	rlen                      [2]byte
+	initiator                 bool
+	checkPeerID               bool
 }
 
 // newSecureSession creates a Noise session over the given insecureConn Conn, using

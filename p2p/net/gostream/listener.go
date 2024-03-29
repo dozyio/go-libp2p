@@ -15,9 +15,9 @@ import (
 type listener struct {
 	host     host.Host
 	ctx      context.Context
-	tag      protocol.ID
 	cancel   func()
 	streamCh chan network.Stream
+	tag      protocol.ID
 }
 
 // Accept returns the next a connection to this listener.

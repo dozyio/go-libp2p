@@ -176,9 +176,9 @@ func TestHandshakeSucceeds(t *testing.T) {
 }
 
 type testcase struct {
+	expectedResult protocol.ID
 	clientProtos   []protocol.ID
 	serverProtos   []protocol.ID
-	expectedResult protocol.ID
 }
 
 func TestHandshakeWithNextProtoSucceeds(t *testing.T) {
@@ -427,9 +427,9 @@ func TestInvalidCerts(t *testing.T) {
 	serverID, serverKey := createPeer(t)
 
 	type transform struct {
-		name     string
 		apply    func(*Identity)
-		checkErr func(*testing.T, error) // the error that the side validating the chain gets
+		checkErr func(*testing.T, error)
+		name     string
 	}
 
 	invalidateCertChain := func(identity *Identity) {

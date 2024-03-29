@@ -25,22 +25,12 @@ import (
 // domain string used to produce the envelope in order to verify the signature
 // and access the payload.
 type Envelope struct {
-	// The public key that can be used to verify the signature and derive the peer id of the signer.
-	PublicKey crypto.PubKey
-
-	// A binary identifier that indicates what kind of data is contained in the payload.
-	// TODO(yusef): enforce multicodec prefix
-	PayloadType []byte
-
-	// The envelope payload.
-	RawPayload []byte
-
-	// The signature of the domain string :: type hint :: payload.
-	signature []byte
-
-	// the unmarshalled payload as a Record, cached on first access via the Record accessor method
+	PublicKey      crypto.PubKey
 	cached         Record
 	unmarshalError error
+	PayloadType    []byte
+	RawPayload     []byte
+	signature      []byte
 	unmarshalOnce  sync.Once
 }
 

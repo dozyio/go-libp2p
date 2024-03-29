@@ -14,16 +14,12 @@ import (
 )
 
 type listener struct {
-	nl     net.Listener
-	server http.Server
-	// The Go standard library sets the http.Server.TLSConfig no matter if this is a WS or WSS,
-	// so we can't rely on checking if server.TLSConfig is set.
-	isWss bool
-
-	laddr ma.Multiaddr
-
+	nl       net.Listener
+	laddr    ma.Multiaddr
 	closed   chan struct{}
 	incoming chan *Conn
+	server   http.Server
+	isWss    bool
 }
 
 func (pwma *parsedWebsocketMultiaddr) toMultiaddr() ma.Multiaddr {

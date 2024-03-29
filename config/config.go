@@ -62,8 +62,8 @@ type AutoNATConfig struct {
 }
 
 type Security struct {
-	ID          protocol.ID
 	Constructor interface{}
+	ID          protocol.ID
 }
 
 // Config describes a set of settings for a libp2p node
@@ -71,64 +71,40 @@ type Security struct {
 // This is *not* a stable interface. Use the options defined in the root
 // package.
 type Config struct {
-	// UserAgent is the identifier this node will send to other peers when
-	// identifying itself, e.g. via the identify protocol.
-	//
-	// Set it via the UserAgent option function.
-	UserAgent string
-
-	// ProtocolVersion is the protocol version that identifies the family
-	// of protocols used by the peer in the Identify protocol. It is set
-	// using the [ProtocolVersion] option.
-	ProtocolVersion string
-
-	PeerKey crypto.PrivKey
-
-	QUICReuse          []fx.Option
-	Transports         []fx.Option
-	Muxers             []tptu.StreamMuxer
-	SecurityTransports []Security
-	Insecure           bool
-	PSK                pnet.PSK
-
-	DialTimeout time.Duration
-
-	RelayCustom bool
-	Relay       bool // should the relay transport be used
-
-	EnableRelayService bool // should we run a circuitv2 relay (if publicly reachable)
-	RelayServiceOpts   []relayv2.Option
-
-	ListenAddrs     []ma.Multiaddr
-	AddrsFactory    bhost.AddrsFactory
-	ConnectionGater connmgr.ConnectionGater
-
-	ConnManager     connmgr.ConnManager
-	ResourceManager network.ResourceManager
-
-	NATManager NATManagerC
-	Peerstore  peerstore.Peerstore
-	Reporter   metrics.Reporter
-
-	MultiaddrResolver *madns.Resolver
-
-	DisablePing bool
-
-	Routing RoutingC
-
-	EnableAutoRelay bool
-	AutoRelayOpts   []autorelay.Option
-	AutoNATConfig
-
-	EnableHolePunching  bool
-	HolePunchingOptions []holepunch.Option
-
-	DisableMetrics       bool
+	ConnectionGater      connmgr.ConnectionGater
 	PrometheusRegisterer prometheus.Registerer
-
-	DialRanker network.DialRanker
-
-	SwarmOpts []swarm.Option
+	PeerKey              crypto.PrivKey
+	Reporter             metrics.Reporter
+	Peerstore            peerstore.Peerstore
+	ResourceManager      network.ResourceManager
+	ConnManager          connmgr.ConnManager
+	Routing              RoutingC
+	AddrsFactory         bhost.AddrsFactory
+	DialRanker           network.DialRanker
+	MultiaddrResolver    *madns.Resolver
+	NATManager           NATManagerC
+	ProtocolVersion      string
+	UserAgent            string
+	Transports           []fx.Option
+	AutoRelayOpts        []autorelay.Option
+	SwarmOpts            []swarm.Option
+	SecurityTransports   []Security
+	Muxers               []tptu.StreamMuxer
+	RelayServiceOpts     []relayv2.Option
+	PSK                  pnet.PSK
+	QUICReuse            []fx.Option
+	HolePunchingOptions  []holepunch.Option
+	ListenAddrs          []ma.Multiaddr
+	AutoNATConfig
+	DialTimeout        time.Duration
+	EnableAutoRelay    bool
+	Relay              bool
+	DisablePing        bool
+	EnableHolePunching bool
+	EnableRelayService bool
+	DisableMetrics     bool
+	RelayCustom        bool
+	Insecure           bool
 }
 
 func (cfg *Config) makeSwarm(eventBus event.Bus, enableMetrics bool) (*swarm.Swarm, error) {

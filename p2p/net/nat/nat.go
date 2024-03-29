@@ -74,18 +74,15 @@ func DiscoverNAT(ctx context.Context) (*NAT, error) {
 // service that will periodically renew port mappings,
 // and keep an up-to-date list of all the external addresses.
 type NAT struct {
-	natmu sync.Mutex
-	nat   nat.NAT
-	// External IP of the NAT. Will be renewed periodically (every CacheTime).
-	extAddr netip.Addr
-
-	refCount  sync.WaitGroup
+	extAddr   netip.Addr
+	nat       nat.NAT
 	ctx       context.Context
 	ctxCancel context.CancelFunc
-
-	mappingmu sync.RWMutex // guards mappings
-	closed    bool
 	mappings  map[entry]int
+	refCount  sync.WaitGroup
+	mappingmu sync.RWMutex
+	natmu     sync.Mutex
+	closed    bool
 }
 
 // Close shuts down all port mappings. NAT can no longer be used.

@@ -103,9 +103,9 @@ func TestCertificateVerification(t *testing.T) {
 
 	for _, tc := range [...]struct {
 		name   string
+		errStr string
 		certs  [][]byte
 		hashes []multihash.DecodedMultihash
-		errStr string
 	}{
 		{
 			name:   "no certificates",

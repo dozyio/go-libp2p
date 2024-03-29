@@ -29,7 +29,7 @@ type Transport struct {
 }
 
 type network struct {
-	mu        sync.RWMutex
 	listeners map[*listener]struct{}
 	dialer    *dialer
+	mu        sync.RWMutex
 }

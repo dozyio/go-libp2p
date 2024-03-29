@@ -17,10 +17,10 @@ var defaultOpsPerCyclicBatch = 20
 // It is similar to go-ds autobatch, but it's driven by an actual Batch facility offered by the
 // ds.
 type cyclicBatch struct {
-	threshold int
 	ds.Batch
-	ds      ds.Batching
-	pending int
+	ds        ds.Batching
+	threshold int
+	pending   int
 }
 
 func newCyclicBatch(ds ds.Batching, threshold int) (ds.Batch, error) {

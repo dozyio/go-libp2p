@@ -15,8 +15,8 @@ import (
 
 type simpleRecord struct {
 	testDomain *string
-	testCodec  []byte
 	message    string
+	testCodec  []byte
 }
 
 func (r *simpleRecord) Domain() string {

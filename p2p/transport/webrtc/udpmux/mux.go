@@ -23,8 +23,8 @@ var log = logging.Logger("webrtc-udpmux")
 const ReceiveBufSize = 1500
 
 type Candidate struct {
-	Ufrag string
 	Addr  *net.UDPAddr
+	Ufrag string
 }
 
 // UDPMux multiplexes multiple ICE connections over a single net.PacketConn,
@@ -42,24 +42,15 @@ type Candidate struct {
 // is a connection associated with the (ufrag, IP address family) pair.
 // If found we add the association to the address map.
 type UDPMux struct {
-	socket net.PacketConn
-
-	queue chan Candidate
-
-	mx sync.Mutex
-	// ufragMap allows us to multiplex incoming STUN packets based on ufrag
-	ufragMap map[ufragConnKey]*muxedConnection
-	// addrMap allows us to correctly direct incoming packets after the connection
-	// is established and ufrag isn't available on all packets
-	addrMap map[string]*muxedConnection
-	// ufragAddrMap allows cleaning up all addresses from the addrMap once the connection is closed
-	// During the ICE connectivity checks, the same ufrag might be used on multiple addresses.
+	socket       net.PacketConn
+	ctx          context.Context
+	queue        chan Candidate
+	ufragMap     map[ufragConnKey]*muxedConnection
+	addrMap      map[string]*muxedConnection
 	ufragAddrMap map[ufragConnKey][]net.Addr
-
-	// the context controls the lifecycle of the mux
-	wg     sync.WaitGroup
-	ctx    context.Context
-	cancel context.CancelFunc
+	cancel       context.CancelFunc
+	wg           sync.WaitGroup
+	mx           sync.Mutex
 }
 
 var _ ice.UDPMux = &UDPMux{}

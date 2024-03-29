@@ -18,9 +18,9 @@ import (
 var log = logging.Logger("peerstore")
 
 type expiringAddr struct {
+	Expires time.Time
 	Addr    ma.Multiaddr
 	TTL     time.Duration
-	Expires time.Time
 }
 
 func (e *expiringAddr) ExpiredBy(t time.Time) bool {
@@ -35,14 +35,9 @@ type peerRecordState struct {
 type addrSegments [256]*addrSegment
 
 type addrSegment struct {
-	sync.RWMutex
-
-	// Use pointers to save memory. Maps always leave some fraction of their
-	// space unused. storing the *values* directly in the map will
-	// drastically increase the space waste. In our case, by 6x.
-	addrs map[peer.ID]map[string]*expiringAddr
-
+	addrs             map[peer.ID]map[string]*expiringAddr
 	signedPeerRecords map[peer.ID]*peerRecordState
+	sync.RWMutex
 }
 
 func (segments *addrSegments) get(p peer.ID) *addrSegment {
@@ -64,13 +59,11 @@ func (rc realclock) Now() time.Time {
 
 // memoryAddrBook manages addresses.
 type memoryAddrBook struct {
-	segments addrSegments
-
-	refCount sync.WaitGroup
-	cancel   func()
-
-	subManager *AddrSubManager
+	segments   addrSegments
 	clock      clock
+	cancel     func()
+	subManager *AddrSubManager
+	refCount   sync.WaitGroup
 }
 
 var _ pstore.AddrBook = (*memoryAddrBook)(nil)
@@ -421,8 +414,8 @@ func (s *addrSub) pubAddr(a ma.Multiaddr) {
 // An abstracted, pub-sub manager for address streams. Extracted from
 // memoryAddrBook in order to support additional implementations.
 type AddrSubManager struct {
-	mu   sync.RWMutex
 	subs map[peer.ID][]*addrSub
+	mu   sync.RWMutex
 }
 
 // NewAddrSubManager initializes an AddrSubManager.

@@ -18,33 +18,26 @@ import (
 var log = logging.Logger("rcmgr")
 
 type resourceManager struct {
-	limits Limiter
-
-	trace          *trace
-	metrics        *metrics
-	disableMetrics bool
-
-	allowlist *Allowlist
-
-	system    *systemScope
-	transient *transientScope
-
+	cancelCtx            context.Context
+	limits               Limiter
+	cancel               func()
+	peer                 map[peer.ID]*peerScope
+	allowlist            *Allowlist
+	system               *systemScope
+	transient            *transientScope
 	allowlistedSystem    *systemScope
 	allowlistedTransient *transientScope
-
-	cancelCtx context.Context
-	cancel    func()
-	wg        sync.WaitGroup
-
-	mx    sync.Mutex
-	svc   map[string]*serviceScope
-	proto map[protocol.ID]*protocolScope
-	peer  map[peer.ID]*peerScope
-
-	stickyProto map[protocol.ID]struct{}
-	stickyPeer  map[peer.ID]struct{}
-
-	connId, streamId int64
+	metrics              *metrics
+	trace                *trace
+	stickyPeer           map[peer.ID]struct{}
+	stickyProto          map[protocol.ID]struct{}
+	svc                  map[string]*serviceScope
+	proto                map[protocol.ID]*protocolScope
+	wg                   sync.WaitGroup
+	connId               int64
+	streamId             int64
+	mx                   sync.Mutex
+	disableMetrics       bool
 }
 
 var _ network.ResourceManager = (*resourceManager)(nil)
@@ -65,44 +58,38 @@ var _ network.ResourceScope = (*transientScope)(nil)
 
 type serviceScope struct {
 	*resourceScope
-
-	service string
 	rcmgr   *resourceManager
-
-	peers map[peer.ID]*resourceScope
+	peers   map[peer.ID]*resourceScope
+	service string
 }
 
 var _ network.ServiceScope = (*serviceScope)(nil)
 
 type protocolScope struct {
 	*resourceScope
-
-	proto protocol.ID
 	rcmgr *resourceManager
-
 	peers map[peer.ID]*resourceScope
+	proto protocol.ID
 }
 
 var _ network.ProtocolScope = (*protocolScope)(nil)
 
 type peerScope struct {
 	*resourceScope
-
-	peer  peer.ID
 	rcmgr *resourceManager
+	peer  peer.ID
 }
 
 var _ network.PeerScope = (*peerScope)(nil)
 
 type connectionScope struct {
+	endpoint multiaddr.Multiaddr
 	*resourceScope
-
+	rcmgr         *resourceManager
+	peer          *peerScope
 	dir           network.Direction
 	usefd         bool
 	isAllowlisted bool
-	rcmgr         *resourceManager
-	peer          *peerScope
-	endpoint      multiaddr.Multiaddr
 }
 
 var _ network.ConnScope = (*connectionScope)(nil)
@@ -110,15 +97,13 @@ var _ network.ConnManagementScope = (*connectionScope)(nil)
 
 type streamScope struct {
 	*resourceScope
-
-	dir   network.Direction
-	rcmgr *resourceManager
-	peer  *peerScope
-	svc   *serviceScope
-	proto *protocolScope
-
+	rcmgr          *resourceManager
+	peer           *peerScope
+	svc            *serviceScope
+	proto          *protocolScope
 	peerProtoScope *resourceScope
 	peerSvcScope   *resourceScope
+	dir            network.Direction
 }
 
 var _ network.StreamScope = (*streamScope)(nil)

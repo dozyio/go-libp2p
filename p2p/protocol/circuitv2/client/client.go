@@ -24,16 +24,14 @@ var log = logging.Logger("p2p-circuit")
 // This allows us to use the v2 code as drop in replacement for v1 in a host without breaking
 // existing code and interoperability with older nodes.
 type Client struct {
-	ctx       context.Context
-	ctxCancel context.CancelFunc
-	host      host.Host
-	upgrader  transport.Upgrader
-
-	incoming chan accept
-
-	mx          sync.Mutex
+	ctx         context.Context
+	host        host.Host
+	upgrader    transport.Upgrader
+	ctxCancel   context.CancelFunc
+	incoming    chan accept
 	activeDials map[peer.ID]*completion
 	hopCount    map[peer.ID]int
+	mx          sync.Mutex
 }
 
 var _ io.Closer = &Client{}
@@ -45,9 +43,9 @@ type accept struct {
 }
 
 type completion struct {
+	err   error
 	ch    chan struct{}
 	relay peer.ID
-	err   error
 }
 
 // New constructs a new p2p-circuit/v2 client, attached to the given host and using the given

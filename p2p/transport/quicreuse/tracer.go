@@ -38,9 +38,9 @@ func qloggerForDir(qlogDir string, p logging.Perspective, ci quic.ConnectionID) 
 // It is not possible to compress on the fly, as compression algorithms keep a lot of internal state,
 // which can easily exhaust the host system's memory when running a few hundred QUIC connections in parallel.
 type qlogger struct {
-	f             *os.File // QLOGDIR/.log_xxx.qlog.swp
-	filename      string   // QLOGDIR/log_xxx.qlog.zst
-	*bufio.Writer          // buffering the f
+	f *os.File
+	*bufio.Writer
+	filename string
 }
 
 func newQlogger(qlogDir string, role logging.Perspective, connID quic.ConnectionID) io.WriteCloser {

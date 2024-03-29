@@ -17,29 +17,25 @@ var streamCounter atomic.Int64
 
 // stream implements network.Stream
 type stream struct {
-	rstream *stream
-	conn    *conn
-	id      int64
-
+	stat      network.Stats
+	writeErr  error
+	rstream   *stream
+	conn      *conn
 	write     *io.PipeWriter
 	read      *io.PipeReader
 	toDeliver chan *transportObject
-
-	reset  chan struct{}
-	close  chan struct{}
-	closed chan struct{}
-
-	writeErr error
-
-	protocol atomic.Pointer[protocol.ID]
-	stat     network.Stats
+	reset     chan struct{}
+	close     chan struct{}
+	closed    chan struct{}
+	protocol  atomic.Pointer[protocol.ID]
+	id        int64
 }
 
 var ErrClosed = errors.New("stream closed")
 
 type transportObject struct {
-	msg         []byte
 	arrivalTime time.Time
+	msg         []byte
 }
 
 func newStreamPair() (*stream, *stream) {

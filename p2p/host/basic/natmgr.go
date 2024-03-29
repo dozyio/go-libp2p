@@ -52,17 +52,14 @@ var discoverNAT = func(ctx context.Context) (nat, error) { return inat.DiscoverN
 //     as the network signals Listen() or ListenClose().
 //   - closing the natManager closes the nat and its mappings.
 type natManager struct {
-	net   network.Network
-	natMx sync.RWMutex
-	nat   nat
-
-	syncFlag chan struct{} // cap: 1
-
-	tracked map[entry]bool // the bool is only used in doSync and has no meaning outside of that function
-
-	refCount  sync.WaitGroup
+	net       network.Network
+	nat       nat
 	ctx       context.Context
+	syncFlag  chan struct{}
+	tracked   map[entry]bool
 	ctxCancel context.CancelFunc
+	refCount  sync.WaitGroup
+	natMx     sync.RWMutex
 }
 
 func newNATManager(net network.Network) *natManager {

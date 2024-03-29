@@ -19,11 +19,11 @@ import (
 // A listener listens for QUIC connections.
 type listener struct {
 	reuseListener   quicreuse.Listener
-	transport       *transport
 	rcmgr           network.ResourceManager
 	privKey         ic.PrivKey
-	localPeer       peer.ID
+	transport       *transport
 	localMultiaddrs map[quic.VersionNumber]ma.Multiaddr
+	localPeer       peer.ID
 }
 
 func newListener(ln quicreuse.Listener, t *transport, localPeer peer.ID, key ic.PrivKey, rcmgr network.ResourceManager) (listener, error) {

@@ -29,13 +29,12 @@ type protoConf struct {
 }
 
 type quicListener struct {
-	l         *quic.Listener
-	transport refCountedQuicTransport
-	running   chan struct{}
-	addrs     []ma.Multiaddr
-
-	protocolsMu sync.Mutex
+	transport   refCountedQuicTransport
+	l           *quic.Listener
+	running     chan struct{}
 	protocols   map[string]protoConf
+	addrs       []ma.Multiaddr
+	protocolsMu sync.Mutex
 }
 
 func newQuicListener(tr refCountedQuicTransport, quicConfig *quic.Config) (*quicListener, error) {
@@ -156,11 +155,11 @@ const queueLen = 16
 
 // A listener for a single ALPN protocol (set).
 type listener struct {
+	addr              net.Addr
 	queue             chan quic.Connection
 	acceptLoopRunning chan struct{}
-	addr              net.Addr
-	addrs             []ma.Multiaddr
 	remove            func()
+	addrs             []ma.Multiaddr
 	closeOnce         sync.Once
 }
 

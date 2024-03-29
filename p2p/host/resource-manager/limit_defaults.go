@@ -22,43 +22,33 @@ type baseLimitConfig struct {
 // {}BaseLimit is the limits that Apply for a minimal node (128 MB of memory for libp2p) and 256 file descriptors.
 // {}LimitIncrease is the additional limit granted for every additional 1 GB of RAM.
 type ScalingLimitConfig struct {
-	SystemBaseLimit     BaseLimit
-	SystemLimitIncrease BaseLimitIncrease
-
-	TransientBaseLimit     BaseLimit
-	TransientLimitIncrease BaseLimitIncrease
-
-	AllowlistedSystemBaseLimit     BaseLimit
-	AllowlistedSystemLimitIncrease BaseLimitIncrease
-
-	AllowlistedTransientBaseLimit     BaseLimit
+	ServiceLimits                     map[string]baseLimitConfig
+	PeerLimits                        map[peer.ID]baseLimitConfig
+	ProtocolPeerLimits                map[protocol.ID]baseLimitConfig
+	ProtocolLimits                    map[protocol.ID]baseLimitConfig
+	ServicePeerLimits                 map[string]baseLimitConfig
+	ServicePeerLimitIncrease          BaseLimitIncrease
+	TransientLimitIncrease            BaseLimitIncrease
 	AllowlistedTransientLimitIncrease BaseLimitIncrease
-
-	ServiceBaseLimit     BaseLimit
-	ServiceLimitIncrease BaseLimitIncrease
-	ServiceLimits        map[string]baseLimitConfig // use AddServiceLimit to modify
-
-	ServicePeerBaseLimit     BaseLimit
-	ServicePeerLimitIncrease BaseLimitIncrease
-	ServicePeerLimits        map[string]baseLimitConfig // use AddServicePeerLimit to modify
-
-	ProtocolBaseLimit     BaseLimit
-	ProtocolLimitIncrease BaseLimitIncrease
-	ProtocolLimits        map[protocol.ID]baseLimitConfig // use AddProtocolLimit to modify
-
-	ProtocolPeerBaseLimit     BaseLimit
-	ProtocolPeerLimitIncrease BaseLimitIncrease
-	ProtocolPeerLimits        map[protocol.ID]baseLimitConfig // use AddProtocolPeerLimit to modify
-
-	PeerBaseLimit     BaseLimit
-	PeerLimitIncrease BaseLimitIncrease
-	PeerLimits        map[peer.ID]baseLimitConfig // use AddPeerLimit to modify
-
-	ConnBaseLimit     BaseLimit
-	ConnLimitIncrease BaseLimitIncrease
-
-	StreamBaseLimit     BaseLimit
-	StreamLimitIncrease BaseLimitIncrease
+	ServiceBaseLimit                  BaseLimit
+	ServiceLimitIncrease              BaseLimitIncrease
+	AllowlistedSystemLimitIncrease    BaseLimitIncrease
+	ServicePeerBaseLimit              BaseLimit
+	SystemBaseLimit                   BaseLimit
+	AllowlistedSystemBaseLimit        BaseLimit
+	ProtocolBaseLimit                 BaseLimit
+	ProtocolLimitIncrease             BaseLimitIncrease
+	AllowlistedTransientBaseLimit     BaseLimit
+	ProtocolPeerBaseLimit             BaseLimit
+	ProtocolPeerLimitIncrease         BaseLimitIncrease
+	TransientBaseLimit                BaseLimit
+	PeerBaseLimit                     BaseLimit
+	PeerLimitIncrease                 BaseLimitIncrease
+	SystemLimitIncrease               BaseLimitIncrease
+	ConnBaseLimit                     BaseLimit
+	ConnLimitIncrease                 BaseLimitIncrease
+	StreamBaseLimit                   BaseLimit
+	StreamLimitIncrease               BaseLimitIncrease
 }
 
 func (cfg *ScalingLimitConfig) AddServiceLimit(svc string, base BaseLimit, inc BaseLimitIncrease) {
@@ -347,32 +337,22 @@ func (l *ResourceLimits) Build(defaults Limit) BaseLimit {
 }
 
 type PartialLimitConfig struct {
-	System    ResourceLimits `json:",omitempty"`
-	Transient ResourceLimits `json:",omitempty"`
-
-	// Limits that are applied to resources with an allowlisted multiaddr.
-	// These will only be used if the normal System & Transient limits are
-	// reached.
-	AllowlistedSystem    ResourceLimits `json:",omitempty"`
-	AllowlistedTransient ResourceLimits `json:",omitempty"`
-
-	ServiceDefault ResourceLimits            `json:",omitempty"`
-	Service        map[string]ResourceLimits `json:",omitempty"`
-
-	ServicePeerDefault ResourceLimits            `json:",omitempty"`
-	ServicePeer        map[string]ResourceLimits `json:",omitempty"`
-
-	ProtocolDefault ResourceLimits                 `json:",omitempty"`
-	Protocol        map[protocol.ID]ResourceLimits `json:",omitempty"`
-
-	ProtocolPeerDefault ResourceLimits                 `json:",omitempty"`
-	ProtocolPeer        map[protocol.ID]ResourceLimits `json:",omitempty"`
-
-	PeerDefault ResourceLimits             `json:",omitempty"`
-	Peer        map[peer.ID]ResourceLimits `json:",omitempty"`
-
-	Conn   ResourceLimits `json:",omitempty"`
-	Stream ResourceLimits `json:",omitempty"`
+	Service              map[string]ResourceLimits      `json:",omitempty"`
+	Peer                 map[peer.ID]ResourceLimits     `json:",omitempty"`
+	ProtocolPeer         map[protocol.ID]ResourceLimits `json:",omitempty"`
+	Protocol             map[protocol.ID]ResourceLimits `json:",omitempty"`
+	ServicePeer          map[string]ResourceLimits      `json:",omitempty"`
+	ProtocolDefault      ResourceLimits                 `json:",omitempty"`
+	ServicePeerDefault   ResourceLimits                 `json:",omitempty"`
+	ServiceDefault       ResourceLimits                 `json:",omitempty"`
+	System               ResourceLimits                 `json:",omitempty"`
+	AllowlistedTransient ResourceLimits                 `json:",omitempty"`
+	ProtocolPeerDefault  ResourceLimits                 `json:",omitempty"`
+	AllowlistedSystem    ResourceLimits                 `json:",omitempty"`
+	PeerDefault          ResourceLimits                 `json:",omitempty"`
+	Transient            ResourceLimits                 `json:",omitempty"`
+	Conn                 ResourceLimits                 `json:",omitempty"`
+	Stream               ResourceLimits                 `json:",omitempty"`
 }
 
 func (cfg *PartialLimitConfig) MarshalJSON() ([]byte, error) {
@@ -512,32 +492,22 @@ func buildMapWithDefault[K comparable](definedLimits map[K]ResourceLimits, defau
 // There is no unset "default" value. Commonly constructed by calling
 // PartialLimitConfig.Build(rcmgr.DefaultLimits.AutoScale())
 type ConcreteLimitConfig struct {
-	system    BaseLimit
-	transient BaseLimit
-
-	// Limits that are applied to resources with an allowlisted multiaddr.
-	// These will only be used if the normal System & Transient limits are
-	// reached.
-	allowlistedSystem    BaseLimit
+	service              map[string]BaseLimit
+	peer                 map[peer.ID]BaseLimit
+	protocolPeer         map[protocol.ID]BaseLimit
+	protocol             map[protocol.ID]BaseLimit
+	servicePeer          map[string]BaseLimit
+	protocolDefault      BaseLimit
+	servicePeerDefault   BaseLimit
+	serviceDefault       BaseLimit
+	system               BaseLimit
 	allowlistedTransient BaseLimit
-
-	serviceDefault BaseLimit
-	service        map[string]BaseLimit
-
-	servicePeerDefault BaseLimit
-	servicePeer        map[string]BaseLimit
-
-	protocolDefault BaseLimit
-	protocol        map[protocol.ID]BaseLimit
-
-	protocolPeerDefault BaseLimit
-	protocolPeer        map[protocol.ID]BaseLimit
-
-	peerDefault BaseLimit
-	peer        map[peer.ID]BaseLimit
-
-	conn   BaseLimit
-	stream BaseLimit
+	protocolPeerDefault  BaseLimit
+	allowlistedSystem    BaseLimit
+	peerDefault          BaseLimit
+	transient            BaseLimit
+	conn                 BaseLimit
+	stream               BaseLimit
 }
 
 func resourceLimitsMapFromBaseLimitMap[K comparable](baseLimitMap map[K]BaseLimit) map[K]ResourceLimits {
@@ -557,20 +527,20 @@ func resourceLimitsMapFromBaseLimitMap[K comparable](baseLimitMap map[K]BaseLimi
 // The returned PartialLimitConfig will have no default values.
 func (cfg ConcreteLimitConfig) ToPartialLimitConfig() PartialLimitConfig {
 	return PartialLimitConfig{
-		System:               cfg.system.ToResourceLimits(),
-		Transient:            cfg.transient.ToResourceLimits(),
-		AllowlistedSystem:    cfg.allowlistedSystem.ToResourceLimits(),
-		AllowlistedTransient: cfg.allowlistedTransient.ToResourceLimits(),
-		ServiceDefault:       cfg.serviceDefault.ToResourceLimits(),
 		Service:              resourceLimitsMapFromBaseLimitMap(cfg.service),
-		ServicePeerDefault:   cfg.servicePeerDefault.ToResourceLimits(),
+		Peer:                 resourceLimitsMapFromBaseLimitMap(cfg.peer),
+		ProtocolPeer:         resourceLimitsMapFromBaseLimitMap(cfg.protocolPeer),
+		Protocol:             resourceLimitsMapFromBaseLimitMap(cfg.protocol),
 		ServicePeer:          resourceLimitsMapFromBaseLimitMap(cfg.servicePeer),
 		ProtocolDefault:      cfg.protocolDefault.ToResourceLimits(),
-		Protocol:             resourceLimitsMapFromBaseLimitMap(cfg.protocol),
+		ServicePeerDefault:   cfg.servicePeerDefault.ToResourceLimits(),
+		ServiceDefault:       cfg.serviceDefault.ToResourceLimits(),
+		System:               cfg.system.ToResourceLimits(),
+		AllowlistedTransient: cfg.allowlistedTransient.ToResourceLimits(),
 		ProtocolPeerDefault:  cfg.protocolPeerDefault.ToResourceLimits(),
-		ProtocolPeer:         resourceLimitsMapFromBaseLimitMap(cfg.protocolPeer),
+		AllowlistedSystem:    cfg.allowlistedSystem.ToResourceLimits(),
 		PeerDefault:          cfg.peerDefault.ToResourceLimits(),
-		Peer:                 resourceLimitsMapFromBaseLimitMap(cfg.peer),
+		Transient:            cfg.transient.ToResourceLimits(),
 		Conn:                 cfg.conn.ToResourceLimits(),
 		Stream:               cfg.stream.ToResourceLimits(),
 	}

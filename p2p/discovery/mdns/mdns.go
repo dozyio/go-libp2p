@@ -37,17 +37,13 @@ type Notifee interface {
 
 type mdnsService struct {
 	host        host.Host
+	ctx         context.Context
+	notifee     Notifee
+	ctxCancel   context.CancelFunc
+	server      *zeroconf.Server
 	serviceName string
 	peerName    string
-
-	// The context is canceled when Close() is called.
-	ctx       context.Context
-	ctxCancel context.CancelFunc
-
-	resolverWG sync.WaitGroup
-	server     *zeroconf.Server
-
-	notifee Notifee
+	resolverWG  sync.WaitGroup
 }
 
 func NewMdnsService(host host.Host, serviceName string, notifee Notifee) *mdnsService {

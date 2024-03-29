@@ -27,30 +27,21 @@ var log = logging.Logger("connmgr")
 //
 // See configuration parameters in NewConnManager.
 type BasicConnMgr struct {
-	*decayer
-
-	clock clock.Clock
-
-	cfg      *config
-	segments segments
-
-	plk       sync.RWMutex
-	protected map[peer.ID]map[string]struct{}
-
-	// channel-based semaphore that enforces only a single trim is in progress
-	trimMutex sync.Mutex
-	connCount atomic.Int32
-	// to be accessed atomically. This is mimicking the implementation of a sync.Once.
-	// Take care of correct alignment when modifying this struct.
-	trimCount uint64
-
-	lastTrimMu sync.RWMutex
-	lastTrim   time.Time
-
-	refCount                sync.WaitGroup
+	segments                segments
+	lastTrim                time.Time
+	clock                   clock.Clock
 	ctx                     context.Context
-	cancel                  func()
+	cfg                     *config
 	unregisterMemoryWatcher func()
+	protected               map[peer.ID]map[string]struct{}
+	cancel                  func()
+	*decayer
+	refCount   sync.WaitGroup
+	trimCount  uint64
+	lastTrimMu sync.RWMutex
+	plk        sync.RWMutex
+	trimMutex  sync.Mutex
+	connCount  atomic.Int32
 }
 
 var (
@@ -59,17 +50,13 @@ var (
 )
 
 type segment struct {
-	sync.Mutex
 	peers map[peer.ID]*peerInfo
+	sync.Mutex
 }
 
 type segments struct {
-	// bucketsMu is used to prevent deadlocks when concurrent processes try to
-	// grab multiple segment locks at once. If you need multiple segment locks
-	// at once, you should grab this lock first. You may release this lock once
-	// you have the segment locks.
-	bucketsMu sync.Mutex
 	buckets   [256]*segment
+	bucketsMu sync.Mutex
 }
 
 func (ss *segments) get(p peer.ID) *segment {
@@ -253,16 +240,13 @@ func (cm *BasicConnMgr) CheckLimit(systemLimit connmgr.GetConnLimiter) error {
 
 // peerInfo stores metadata for a given peer.
 type peerInfo struct {
-	id       peer.ID
-	tags     map[string]int                          // value for each tag
-	decaying map[*decayingTag]*connmgr.DecayingValue // decaying tags
-
-	value int  // cached sum of all tag values
-	temp  bool // this is a temporary entry holding early tags, and awaiting connections
-
-	conns map[network.Conn]time.Time // start time of each connection
-
-	firstSeen time.Time // timestamp when we began tracking this peer.
+	firstSeen time.Time
+	tags      map[string]int
+	decaying  map[*decayingTag]*connmgr.DecayingValue
+	conns     map[network.Conn]time.Time
+	id        peer.ID
+	value     int
+	temp      bool
 }
 
 type peerInfos []*peerInfo
@@ -617,20 +601,11 @@ func (cm *BasicConnMgr) UpsertTag(p peer.ID, tag string, upsert func(int) int) {
 
 // CMInfo holds the configuration for BasicConnMgr, as well as status data.
 type CMInfo struct {
-	// The low watermark, as described in NewConnManager.
-	LowWater int
-
-	// The high watermark, as described in NewConnManager.
-	HighWater int
-
-	// The timestamp when the last trim was triggered.
-	LastTrim time.Time
-
-	// The configured grace period, as described in NewConnManager.
+	LastTrim    time.Time
+	LowWater    int
+	HighWater   int
 	GracePeriod time.Duration
-
-	// The current connection count.
-	ConnCount int
+	ConnCount   int
 }
 
 // GetInfo returns the configuration and status data for this connection manager.

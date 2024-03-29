@@ -18,8 +18,8 @@ import (
 
 type delayedDiscovery struct {
 	disc  discovery.Discovery
-	delay time.Duration
 	clock *mockClock.Mock
+	delay time.Duration
 }
 
 func (d *delayedDiscovery) Advertise(ctx context.Context, ns string, opts ...discovery.Option) (time.Duration, error) {
@@ -211,7 +211,11 @@ func TestBackoffDiscoverySimultaneousQuery(t *testing.T) {
 		advertisers[i] = mocks.NewDiscoveryClient(h, discServer)
 	}
 
-	d1 := &delayedDiscovery{advertisers[0], time.Millisecond * 10, clock}
+	d1 := &delayedDiscovery{
+		disc:  advertisers[0],
+		clock: clock,
+		delay: time.Millisecond * 10,
+	}
 
 	bkf := NewFixedBackoff(time.Millisecond * 200)
 	dCache, err := NewBackoffDiscovery(d1, bkf, withClock(clock))

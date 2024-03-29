@@ -50,13 +50,11 @@ func TestAllowedSimple(t *testing.T) {
 
 func TestAllowedWithPeer(t *testing.T) {
 	type testcase struct {
-		name      string
-		allowlist []string
-		endpoint  multiaddr.Multiaddr
-		peer      peer.ID
-		// Is this endpoint allowed? (We don't have peer info yet)
-		isConnAllowed bool
-		// Is this peer + endpoint allowed?
+		endpoint          multiaddr.Multiaddr
+		name              string
+		peer              peer.ID
+		allowlist         []string
+		isConnAllowed     bool
 		isAllowedWithPeer bool
 	}
 

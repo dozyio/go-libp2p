@@ -22,26 +22,17 @@ import (
 type PeerSource func(ctx context.Context, num int) <-chan peer.AddrInfo
 
 type config struct {
-	clock      ClockWithInstantTimer
-	peerSource PeerSource
-	// minimum interval used to call the peerSource callback
-	minInterval time.Duration
-	// see WithMinCandidates
-	minCandidates int
-	// see WithMaxCandidates
-	maxCandidates int
-	// Delay until we obtain reservations with relays, if we have less than minCandidates candidates.
-	// See WithBootDelay.
-	bootDelay time.Duration
-	// backoff is the time we wait after failing to obtain a reservation with a candidate
-	backoff time.Duration
-	// Number of relays we strive to obtain a reservation with.
-	desiredRelays int
-	// see WithMaxCandidateAge
+	clock            ClockWithInstantTimer
+	metricsTracer    MetricsTracer
+	peerSource       PeerSource
+	minInterval      time.Duration
+	minCandidates    int
+	maxCandidates    int
+	bootDelay        time.Duration
+	backoff          time.Duration
+	desiredRelays    int
 	maxCandidateAge  time.Duration
 	setMinCandidates bool
-	// see WithMetricsTracer
-	metricsTracer MetricsTracer
 }
 
 var defaultConfig = config{

@@ -15,16 +15,14 @@ import (
 )
 
 type trace struct {
-	path string
-
-	ctx    context.Context
-	cancel func()
-	wg     sync.WaitGroup
-
-	mx            sync.Mutex
-	done          bool
+	ctx           context.Context
+	cancel        func()
+	path          string
 	pendingWrites []interface{}
 	reporters     []TraceReporter
+	wg            sync.WaitGroup
+	mx            sync.Mutex
+	done          bool
 }
 
 type TraceReporter interface {
@@ -185,29 +183,21 @@ func (s scopeClass) MarshalJSON() ([]byte, error) {
 }
 
 type TraceEvt struct {
-	Time string
-	Type TraceEvtTyp
-
-	Scope *scopeClass `json:",omitempty"`
-	Name  string      `json:",omitempty"`
-
-	Limit interface{} `json:",omitempty"`
-
-	Priority uint8 `json:",omitempty"`
-
-	Delta    int64 `json:",omitempty"`
-	DeltaIn  int   `json:",omitempty"`
-	DeltaOut int   `json:",omitempty"`
-
-	Memory int64 `json:",omitempty"`
-
-	StreamsIn  int `json:",omitempty"`
-	StreamsOut int `json:",omitempty"`
-
-	ConnsIn  int `json:",omitempty"`
-	ConnsOut int `json:",omitempty"`
-
-	FD int `json:",omitempty"`
+	Limit      interface{} `json:",omitempty"`
+	Scope      *scopeClass `json:",omitempty"`
+	Time       string
+	Type       TraceEvtTyp
+	Name       string `json:",omitempty"`
+	Delta      int64  `json:",omitempty"`
+	DeltaIn    int    `json:",omitempty"`
+	DeltaOut   int    `json:",omitempty"`
+	Memory     int64  `json:",omitempty"`
+	StreamsIn  int    `json:",omitempty"`
+	StreamsOut int    `json:",omitempty"`
+	ConnsIn    int    `json:",omitempty"`
+	ConnsOut   int    `json:",omitempty"`
+	FD         int    `json:",omitempty"`
+	Priority   uint8  `json:",omitempty"`
 }
 
 func (t *trace) push(evt TraceEvt) {

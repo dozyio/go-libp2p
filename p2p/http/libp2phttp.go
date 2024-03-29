@@ -43,9 +43,9 @@ type PeerMeta map[protocol.ID]ProtocolMeta
 
 // WellKnownHandler is an http.Handler that serves the .well-known/libp2p resource
 type WellKnownHandler struct {
-	wellknownMapMu   sync.Mutex
 	wellKnownMapping PeerMeta
 	wellKnownCache   []byte
+	wellknownMapMu   sync.Mutex
 }
 
 // streamHostListen returns a net.Listener that listens on libp2p streams for HTTP/1.1 messages.
@@ -112,53 +112,25 @@ func (h *WellKnownHandler) RemoveProtocolMeta(p protocol.ID) {
 //
 //	Warning, this is experimental. The API will likely change.
 type Host struct {
-	// StreamHost is a stream based libp2p host used to do HTTP over libp2p streams. May be nil
-	StreamHost host.Host
-	// ListenAddrs are the requested addresses to listen on. Multiaddrs must be
-	// valid HTTP(s) multiaddr. Only multiaddrs for an HTTP transport are
-	// supported (must end with /http or /https).
-	ListenAddrs []ma.Multiaddr
-	// TLSConfig is the TLS config for the server to use
-	TLSConfig *tls.Config
-	// InsecureAllowHTTP indicates if the server is allowed to serve unencrypted
-	// HTTP requests over TCP.
-	InsecureAllowHTTP bool
-	// ServeMux is the http.ServeMux used by the server to serve requests. If
-	// nil, a new serve mux will be created. Users may manually add handlers to
-	// this mux instead of using `SetHTTPHandler`, but if they do, they should
-	// also update the WellKnownHandler's protocol mapping.
-	ServeMux           *http.ServeMux
-	initializeServeMux sync.Once
-
-	// DefaultClientRoundTripper is the default http.RoundTripper for clients to
-	// use when making requests over an HTTP transport. This must be an
-	// `*http.Transport` type so that the transport can be cloned and the
-	// `TLSClientConfig` field can be configured. If unset, it will create a new
-	// `http.Transport` on first use.
-	DefaultClientRoundTripper *http.Transport
-
-	// WellKnownHandler is the http handler for the `.well-known/libp2p`
-	// resource. It is responsible for sharing this node's protocol metadata
-	// with other nodes. Users only care about this if they set their own
-	// ServeMux with pre-existing routes. By default, new protocols are added
-	// here when a user calls `SetHTTPHandler` or `SetHTTPHandlerAtPath`.
-	WellKnownHandler WellKnownHandler
-
-	// peerMetadata is an LRU cache of a peer's well-known protocol map.
-	peerMetadata *lru.Cache[peer.ID, PeerMeta]
-	// createHTTPTransport is used to lazily create the httpTransport in a thread-safe way.
-	createHTTPTransport sync.Once
-	// createDefaultClientRoundTripper is used to lazily create the default
-	// client round tripper in a thread-safe way.
-	createDefaultClientRoundTripper sync.Once
+	StreamHost                      host.Host
+	TLSConfig                       *tls.Config
+	ServeMux                        *http.ServeMux
+	DefaultClientRoundTripper       *http.Transport
+	peerMetadata                    *lru.Cache[peer.ID, PeerMeta]
 	httpTransport                   *httpTransport
+	WellKnownHandler                WellKnownHandler
+	ListenAddrs                     []ma.Multiaddr
+	initializeServeMux              sync.Once
+	createHTTPTransport             sync.Once
+	createDefaultClientRoundTripper sync.Once
+	InsecureAllowHTTP               bool
 }
 
 type httpTransport struct {
-	listenAddrs         []ma.Multiaddr
-	listeners           []net.Listener
 	closeListeners      chan struct{}
 	waitingForListeners chan struct{}
+	listenAddrs         []ma.Multiaddr
+	listeners           []net.Listener
 }
 
 func newPeerMetadataCache() *lru.Cache[peer.ID, PeerMeta] {
@@ -381,11 +353,11 @@ type PeerMetadataGetter interface {
 }
 
 type streamRoundTripper struct {
-	server      peer.ID
-	addrsAdded  sync.Once
-	serverAddrs []ma.Multiaddr
 	h           host.Host
 	httpHost    *Host
+	server      peer.ID
+	serverAddrs []ma.Multiaddr
+	addrsAdded  sync.Once
 }
 
 // streamReadCloser wraps an io.ReadCloser and closes the underlying stream when
@@ -444,13 +416,13 @@ func (rt *streamRoundTripper) RoundTrip(r *http.Request) (*http.Response, error)
 // The underlying RoundTripper MUST be an HTTP Transport.
 type roundTripperForSpecificServer struct {
 	http.RoundTripper
-	ownRoundtripper  bool
 	httpHost         *Host
+	cachedProtos     PeerMeta
 	server           peer.ID
 	targetServerAddr string
 	sni              string
 	scheme           string
-	cachedProtos     PeerMeta
+	ownRoundtripper  bool
 }
 
 func (rt *roundTripperForSpecificServer) GetPeerMetadata() (PeerMeta, error) {
@@ -671,10 +643,10 @@ func (h *Host) NewConstrainedRoundTripper(server peer.AddrInfo, opts ...RoundTri
 }
 
 type httpMultiaddr struct {
-	useHTTPS bool
 	host     string
 	port     string
 	sni      string
+	useHTTPS bool
 }
 
 func parseMultiaddr(addr ma.Multiaddr) httpMultiaddr {

@@ -38,24 +38,17 @@ const (
 )
 
 type listener struct {
-	transport *WebRTCTransport
-
-	mux *udpmux.UDPMux
-
-	config                    webrtc.Configuration
+	localAddr                 net.Addr
+	localMultiaddr            ma.Multiaddr
+	ctx                       context.Context
+	transport                 *WebRTCTransport
+	mux                       *udpmux.UDPMux
+	acceptQueue               chan tpt.CapableConn
+	cancel                    context.CancelFunc
 	localFingerprint          webrtc.DTLSFingerprint
 	localFingerprintMultibase string
-
-	localAddr      net.Addr
-	localMultiaddr ma.Multiaddr
-
-	// buffered incoming connections
-	acceptQueue chan tpt.CapableConn
-
-	// used to control the lifecycle of the listener
-	ctx    context.Context
-	cancel context.CancelFunc
-	wg     sync.WaitGroup
+	config                    webrtc.Configuration
+	wg                        sync.WaitGroup
 }
 
 var _ tpt.Listener = &listener{}

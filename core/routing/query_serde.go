@@ -18,9 +18,9 @@ func (qe *QueryEvent) MarshalJSON() ([]byte, error) {
 func (qe *QueryEvent) UnmarshalJSON(b []byte) error {
 	temp := struct {
 		ID        string
-		Type      int
-		Responses []*peer.AddrInfo
 		Extra     string
+		Responses []*peer.AddrInfo
+		Type      int
 	}{}
 	err := json.Unmarshal(b, &temp)
 	if err != nil {

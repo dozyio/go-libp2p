@@ -62,13 +62,10 @@ var (
 
 type refcountedTransport struct {
 	quic.Transport
-
-	// Used to write packets directly around QUIC.
-	packetConn net.PacketConn
-
-	mutex       sync.Mutex
-	refCount    int
 	unusedSince time.Time
+	packetConn  net.PacketConn
+	refCount    int
+	mutex       sync.Mutex
 }
 
 func (c *refcountedTransport) IncreaseCount() {
@@ -108,22 +105,15 @@ func (c *refcountedTransport) ShouldGarbageCollect(now time.Time) bool {
 }
 
 type reuse struct {
-	mutex sync.Mutex
-
-	closeChan  chan struct{}
-	gcStopChan chan struct{}
-
-	routes  routing.Router
-	unicast map[string] /* IP.String() */ map[int] /* port */ *refcountedTransport
-	// globalListeners contains transports that are listening on 0.0.0.0 / ::
-	globalListeners map[int]*refcountedTransport
-	// globalDialers contains transports that we've dialed out from. These transports are listening on 0.0.0.0 / ::
-	// On Dial, transports are reused from this map if no transport is available in the globalListeners
-	// On Listen, transports are reused from this map if the requested port is 0, and then moved to globalListeners
-	globalDialers map[int]*refcountedTransport
-
+	routes            routing.Router
+	closeChan         chan struct{}
+	gcStopChan        chan struct{}
+	unicast           map[string]map[int]*refcountedTransport
+	globalListeners   map[int]*refcountedTransport
+	globalDialers     map[int]*refcountedTransport
 	statelessResetKey *quic.StatelessResetKey
 	tokenGeneratorKey *quic.TokenGeneratorKey
+	mutex             sync.Mutex
 }
 
 func newReuse(srk *quic.StatelessResetKey, tokenKey *quic.TokenGeneratorKey) *reuse {

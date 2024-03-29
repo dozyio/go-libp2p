@@ -28,11 +28,11 @@ type ResourceManagerState interface {
 }
 
 type ResourceManagerStat struct {
-	System    network.ScopeStat
-	Transient network.ScopeStat
 	Services  map[string]network.ScopeStat
 	Protocols map[protocol.ID]network.ScopeStat
 	Peers     map[peer.ID]network.ScopeStat
+	System    network.ScopeStat
+	Transient network.ScopeStat
 }
 
 var _ ResourceManagerState = (*resourceManager)(nil)

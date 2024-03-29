@@ -26,10 +26,9 @@ var (
 
 type Conn struct {
 	stream network.Stream
-	remote peer.AddrInfo
-	stat   network.ConnStats
-
 	client *Client
+	stat   network.ConnStats
+	remote peer.AddrInfo
 }
 
 type NetAddr struct {

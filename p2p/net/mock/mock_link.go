@@ -12,11 +12,9 @@ import (
 // and, for simplicity, network.Conn
 type link struct {
 	mock        *mocknet
+	ratelimiter *RateLimiter
 	nets        []*peernet
 	opts        LinkOptions
-	ratelimiter *RateLimiter
-	// this could have addresses on both sides.
-
 	sync.RWMutex
 }
 

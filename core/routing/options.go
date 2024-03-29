@@ -5,11 +5,9 @@ type Option func(opts *Options) error
 
 // Options is a set of routing options
 type Options struct {
-	// Allow expired values.
+	Other   map[interface{}]interface{}
 	Expired bool
 	Offline bool
-	// Other (ValueStore implementation specific) options.
-	Other map[interface{}]interface{}
 }
 
 // Apply applies the given options to this Options

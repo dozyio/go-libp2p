@@ -36,25 +36,20 @@ const errorCodeConnectionGating = 0x47415445 // GATE in ASCII
 
 // The Transport implements the tpt.Transport interface for QUIC connections.
 type transport struct {
-	privKey     ic.PrivKey
-	localPeer   peer.ID
-	identity    *p2ptls.Identity
-	connManager *quicreuse.ConnManager
-	gater       connmgr.ConnectionGater
-	rcmgr       network.ResourceManager
-
-	holePunchingMx sync.Mutex
+	privKey        ic.PrivKey
+	gater          connmgr.ConnectionGater
+	rcmgr          network.ResourceManager
+	identity       *p2ptls.Identity
+	connManager    *quicreuse.ConnManager
+	listeners      map[string][]*virtualListener
 	holePunching   map[holePunchKey]*activeHolePunch
-
-	rndMx sync.Mutex
-	rnd   rand.Rand
-
-	connMx sync.Mutex
-	conns  map[quic.Connection]*conn
-
-	listenersMu sync.Mutex
-	// map of UDPAddr as string to a virtualListeners
-	listeners map[string][]*virtualListener
+	conns          map[quic.Connection]*conn
+	localPeer      peer.ID
+	rnd            rand.Rand
+	connMx         sync.Mutex
+	rndMx          sync.Mutex
+	listenersMu    sync.Mutex
+	holePunchingMx sync.Mutex
 }
 
 var _ tpt.Transport = &transport{}

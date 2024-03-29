@@ -93,8 +93,8 @@ func (p *PingService) PingHandler(s network.Stream) {
 
 // Result is a result of a ping attempt, either an RTT or an error.
 type Result struct {
-	RTT   time.Duration
 	Error error
+	RTT   time.Duration
 }
 
 func (ps *PingService) Ping(ctx context.Context, p peer.ID) <-chan Result {

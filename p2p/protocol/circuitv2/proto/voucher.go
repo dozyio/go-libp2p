@@ -20,12 +20,9 @@ func init() {
 }
 
 type ReservationVoucher struct {
-	// Relay is the ID of the peer providing relay service
-	Relay peer.ID
-	// Peer is the ID of the peer receiving relay service through Relay
-	Peer peer.ID
-	// Expiration is the expiration time of the reservation
 	Expiration time.Time
+	Relay      peer.ID
+	Peer       peer.ID
 }
 
 var _ record.Record = (*ReservationVoucher)(nil)

@@ -91,8 +91,8 @@ func (c *client) DialBack(ctx context.Context, p peer.ID) error {
 
 // Error wraps errors signalled by AutoNAT services
 type Error struct {
-	Status pb.Message_ResponseStatus
 	Text   string
+	Status pb.Message_ResponseStatus
 }
 
 func (e Error) Error() string {

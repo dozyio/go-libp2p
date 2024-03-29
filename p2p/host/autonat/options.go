@@ -10,29 +10,24 @@ import (
 
 // config holds configurable options for the autonat subsystem.
 type config struct {
-	host host.Host
-
-	addressFunc       AddrFunc
-	dialPolicy        dialPolicy
-	dialer            network.Network
-	forceReachability bool
-	reachability      network.Reachability
-	metricsTracer     MetricsTracer
-
-	// client
-	bootDelay          time.Duration
-	retryInterval      time.Duration
-	refreshInterval    time.Duration
-	requestTimeout     time.Duration
-	throttlePeerPeriod time.Duration
-
-	// server
+	dialPolicy          dialPolicy
+	metricsTracer       MetricsTracer
+	dialer              network.Network
+	host                host.Host
+	addressFunc         AddrFunc
 	dialTimeout         time.Duration
+	reachability        network.Reachability
+	bootDelay           time.Duration
+	retryInterval       time.Duration
+	refreshInterval     time.Duration
+	requestTimeout      time.Duration
+	throttlePeerPeriod  time.Duration
 	maxPeerAddresses    int
 	throttleGlobalMax   int
 	throttlePeerMax     int
 	throttleResetPeriod time.Duration
 	throttleResetJitter time.Duration
+	forceReachability   bool
 }
 
 var defaults = func(c *config) error {

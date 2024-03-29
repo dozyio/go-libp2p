@@ -47,9 +47,9 @@ type dsAddrBookGc struct {
 	ctx              context.Context
 	ab               *dsAddrBook
 	running          chan struct{}
-	lookaheadEnabled bool
 	purgeFunc        func()
 	currWindowEnd    int64
+	lookaheadEnabled bool
 }
 
 func newAddressBookGc(ctx context.Context, ab *dsAddrBook) (*dsAddrBookGc, error) {

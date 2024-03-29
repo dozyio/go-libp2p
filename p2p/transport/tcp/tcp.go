@@ -115,19 +115,12 @@ func WithMetrics() Option {
 
 // TcpTransport is the TCP transport.
 type TcpTransport struct {
-	// Connection upgrader for upgrading insecure stream connections to
-	// secure multiplex connections.
-	upgrader transport.Upgrader
-
-	disableReuseport bool // Explicitly disable reuseport.
+	upgrader         transport.Upgrader
+	rcmgr            network.ResourceManager
+	reuse            reuseport.Transport
+	connectTimeout   time.Duration
+	disableReuseport bool
 	enableMetrics    bool
-
-	// TCP connect timeout
-	connectTimeout time.Duration
-
-	rcmgr network.ResourceManager
-
-	reuse reuseport.Transport
 }
 
 var _ transport.Transport = &TcpTransport{}

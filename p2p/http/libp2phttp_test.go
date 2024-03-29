@@ -92,8 +92,8 @@ func TestRoundTrippers(t *testing.T) {
 	serverHTTPAddr := serverMultiaddrs[1]
 
 	testCases := []struct {
-		name                     string
 		setupRoundTripper        func(t *testing.T, clientStreamHost host.Host, clientHTTPHost *libp2phttp.Host) http.RoundTripper
+		name                     string
 		expectStreamRoundTripper bool
 	}{
 		{
@@ -237,9 +237,9 @@ func TestPlainOldHTTPServer(t *testing.T) {
 	serverAddrParts := strings.Split(l.Addr().String(), ":")
 
 	testCases := []struct {
-		name         string
 		do           func(*testing.T, *http.Request) (*http.Response, error)
 		getWellKnown func(*testing.T) (libp2phttp.PeerMeta, error)
+		name         string
 	}{
 		{
 			name: "using libp2phttp",

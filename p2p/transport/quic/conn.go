@@ -13,16 +13,14 @@ import (
 )
 
 type conn struct {
-	quicConn  quic.Connection
-	transport *transport
-	scope     network.ConnManagementScope
-
-	localPeer      peer.ID
-	localMultiaddr ma.Multiaddr
-
-	remotePeerID    peer.ID
+	quicConn        quic.Connection
+	scope           network.ConnManagementScope
+	localMultiaddr  ma.Multiaddr
 	remotePubKey    ic.PubKey
 	remoteMultiaddr ma.Multiaddr
+	transport       *transport
+	localPeer       peer.ID
+	remotePeerID    peer.ID
 }
 
 var _ tpt.CapableConn = &conn{}

@@ -7,8 +7,10 @@ import (
 )
 
 type ErrStreamOrConnLimitExceeded struct {
-	current, attempted, limit int
-	err                       error
+	err       error
+	current   int
+	attempted int
+	limit     int
 }
 
 func (e *ErrStreamOrConnLimitExceeded) Error() string { return e.err.Error() }
@@ -53,9 +55,11 @@ func logValuesConnLimit(scope, edge string, dir network.Direction, usefd bool, s
 }
 
 type ErrMemoryLimitExceeded struct {
-	current, attempted, limit int64
-	priority                  uint8
-	err                       error
+	err       error
+	current   int64
+	attempted int64
+	limit     int64
+	priority  uint8
 }
 
 func (e *ErrMemoryLimitExceeded) Error() string { return e.err.Error() }

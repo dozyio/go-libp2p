@@ -35,16 +35,16 @@ const (
 // QueryEvent is emitted for every notable event that happens during a DHT query.
 type QueryEvent struct {
 	ID        peer.ID
-	Type      QueryEventType
-	Responses []*peer.AddrInfo
 	Extra     string
+	Responses []*peer.AddrInfo
+	Type      QueryEventType
 }
 
 type routingQueryKey struct{}
 type eventChannel struct {
-	mu  sync.Mutex
 	ctx context.Context
 	ch  chan<- *QueryEvent
+	mu  sync.Mutex
 }
 
 // waitThenClose is spawned in a goroutine when the channel is registered. This

@@ -18,13 +18,13 @@ var GracefulCloseTimeout = 100 * time.Millisecond
 
 // Conn implements net.Conn interface for gorilla/websocket.
 type Conn struct {
+	reader io.Reader
 	*ws.Conn
-	secure             bool
 	DefaultMessageType int
-	reader             io.Reader
 	closeOnce          sync.Once
-
-	readLock, writeLock sync.Mutex
+	readLock           sync.Mutex
+	writeLock          sync.Mutex
+	secure             bool
 }
 
 var _ net.Conn = (*Conn)(nil)

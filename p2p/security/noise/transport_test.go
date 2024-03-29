@@ -635,9 +635,9 @@ func TestEarlyfffDataAcceptedWithNoHandler(t *testing.T) {
 }
 
 type noiseEarlyDataTestCase struct {
+	expectedResult protocol.ID
 	clientProtos   []protocol.ID
 	serverProtos   []protocol.ID
-	expectedResult protocol.ID
 }
 
 func TestHandshakeWithTransportEarlyData(t *testing.T) {

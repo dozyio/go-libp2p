@@ -15,11 +15,11 @@ const acceptBufferPerVersion = 4
 // virtualListener is a listener that exposes a single multiaddr but uses another listener under the hood
 type virtualListener struct {
 	*listener
-	udpAddr       string
-	version       quic.VersionNumber
 	t             *transport
 	acceptRunnner *acceptLoopRunner
 	acceptChan    chan acceptVal
+	udpAddr       string
+	version       quic.VersionNumber
 }
 
 var _ tpt.Listener = &virtualListener{}
@@ -43,10 +43,9 @@ type acceptVal struct {
 }
 
 type acceptLoopRunner struct {
-	acceptSem chan struct{}
-
-	muxerMu     sync.Mutex
+	acceptSem   chan struct{}
 	muxer       map[quic.VersionNumber]chan acceptVal
+	muxerMu     sync.Mutex
 	muxerClosed bool
 }
 

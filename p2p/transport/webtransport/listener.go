@@ -22,21 +22,16 @@ const queueLen = 16
 const handshakeTimeout = 10 * time.Second
 
 type listener struct {
-	transport       *transport
-	isStaticTLSConf bool
+	server          webtransport.Server
 	reuseListener   quicreuse.Listener
-
-	server webtransport.Server
-
-	ctx       context.Context
-	ctxCancel context.CancelFunc
-
-	serverClosed chan struct{} // is closed when server.Serve returns
-
-	addr      net.Addr
-	multiaddr ma.Multiaddr
-
-	queue chan tpt.CapableConn
+	ctx             context.Context
+	addr            net.Addr
+	multiaddr       ma.Multiaddr
+	transport       *transport
+	ctxCancel       context.CancelFunc
+	serverClosed    chan struct{}
+	queue           chan tpt.CapableConn
+	isStaticTLSConf bool
 }
 
 var _ tpt.Listener = &listener{}

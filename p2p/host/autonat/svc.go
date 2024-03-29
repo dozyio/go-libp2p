@@ -27,16 +27,13 @@ const (
 
 // AutoNATService provides NAT autodetection services to other peers
 type autoNATService struct {
-	instanceLock      sync.Mutex
 	instance          context.CancelFunc
-	backgroundRunning chan struct{} // closed when background exits
-
-	config *config
-
-	// rate limiter
-	mx         sync.Mutex
-	reqs       map[peer.ID]int
-	globalReqs int
+	backgroundRunning chan struct{}
+	config            *config
+	reqs              map[peer.ID]int
+	globalReqs        int
+	instanceLock      sync.Mutex
+	mx                sync.Mutex
 }
 
 // NewAutoNATService creates a new AutoNATService instance attached to a host

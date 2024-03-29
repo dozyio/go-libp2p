@@ -15,14 +15,14 @@ type clock interface {
 }
 
 type MockDiscoveryServer struct {
-	mx    sync.Mutex
-	db    map[string]map[peer.ID]*discoveryRegistration
 	clock clock
+	db    map[string]map[peer.ID]*discoveryRegistration
+	mx    sync.Mutex
 }
 
 type discoveryRegistration struct {
-	info       peer.AddrInfo
 	expiration time.Time
+	info       peer.AddrInfo
 }
 
 func NewDiscoveryServer(clock clock) *MockDiscoveryServer {
@@ -41,7 +41,10 @@ func (s *MockDiscoveryServer) Advertise(ns string, info peer.AddrInfo, ttl time.
 		peers = make(map[peer.ID]*discoveryRegistration)
 		s.db[ns] = peers
 	}
-	peers[info.ID] = &discoveryRegistration{info, s.clock.Now().Add(ttl)}
+	peers[info.ID] = &discoveryRegistration{
+		expiration: s.clock.Now().Add(ttl),
+		info:       info,
+	}
 	return ttl, nil
 }
 

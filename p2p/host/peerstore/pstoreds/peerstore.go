@@ -19,25 +19,12 @@ import (
 
 // Configuration object for the peerstore.
 type Options struct {
-	// The size of the in-memory cache. A value of 0 or lower disables the cache.
-	CacheSize uint
-
-	// MaxProtocols is the maximum number of protocols we store for one peer.
-	MaxProtocols int
-
-	// Sweep interval to purge expired addresses from the datastore. If this is a zero value, GC will not run
-	// automatically, but it'll be available on demand via explicit calls.
-	GCPurgeInterval time.Duration
-
-	// Interval to renew the GC lookahead window. If this is a zero value, lookahead will be disabled and we'll
-	// traverse the entire datastore for every purge cycle.
+	Clock               clock
+	CacheSize           uint
+	MaxProtocols        int
+	GCPurgeInterval     time.Duration
 	GCLookaheadInterval time.Duration
-
-	// Initial delay before GC processes start. Intended to give the system breathing room to fully boot
-	// before starting GC.
-	GCInitialDelay time.Duration
-
-	Clock clock
+	GCInitialDelay      time.Duration
 }
 
 // DefaultOpts returns the default options for a persistent peerstore, with the full-purge GC algorithm:

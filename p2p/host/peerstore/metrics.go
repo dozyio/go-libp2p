@@ -13,8 +13,8 @@ import (
 var LatencyEWMASmoothing = 0.1
 
 type metrics struct {
-	mutex  sync.RWMutex
 	latmap map[peer.ID]time.Duration
+	mutex  sync.RWMutex
 }
 
 func NewMetrics() *metrics {

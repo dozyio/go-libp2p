@@ -8,13 +8,13 @@ import (
 // A RateLimiter is used by a link to determine how long to wait before sending
 // data given a bandwidth cap.
 type RateLimiter struct {
+	lastUpdate   time.Time
+	bandwidth    float64
+	allowance    float64
+	maxAllowance float64
+	count        int
+	duration     time.Duration
 	lock         sync.Mutex
-	bandwidth    float64       // bytes per nanosecond
-	allowance    float64       // in bytes
-	maxAllowance float64       // in bytes
-	lastUpdate   time.Time     // when allowance was updated last
-	count        int           // number of times rate limiting was applied
-	duration     time.Duration // total delay introduced due to rate limiting
 }
 
 // Creates a new RateLimiter with bandwidth (in bytes/sec)

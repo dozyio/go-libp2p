@@ -62,45 +62,35 @@ type AddrsFactory func([]ma.Multiaddr) []ma.Multiaddr
 //   - uses an identity service to send + receive node information
 //   - uses a nat service to establish NAT port mappings
 type BasicHost struct {
-	ctx       context.Context
-	ctxCancel context.CancelFunc
-	// ensures we shutdown ONLY once
-	closeSync sync.Once
-	// keep track of resources we need to wait on before shutting down
-	refCount sync.WaitGroup
-
-	network      network.Network
-	psManager    *pstoremanager.PeerstoreManager
-	mux          *msmux.MultistreamMuxer[protocol.ID]
-	ids          identify.IDService
-	hps          *holepunch.Service
-	pings        *ping.PingService
-	natmgr       NATManager
-	maResolver   *madns.Resolver
-	cmgr         connmgr.ConnManager
-	eventbus     event.Bus
-	relayManager *relaysvc.RelayManager
-
-	AddrsFactory AddrsFactory
-
-	negtimeout time.Duration
-
 	emitters struct {
 		evtLocalProtocolsUpdated event.Emitter
 		evtLocalAddrsUpdated     event.Emitter
 	}
-
-	addrChangeChan chan struct{}
-
-	addrMu                 sync.RWMutex
-	filteredInterfaceAddrs []ma.Multiaddr
-	allInterfaceAddrs      []ma.Multiaddr
-
-	disableSignedPeerRecord bool
-	signKey                 crypto.PrivKey
+	natmgr                  NATManager
+	autoNat                 autonat.AutoNAT
 	caBook                  peerstore.CertifiedAddrBook
-
-	autoNat autonat.AutoNAT
+	signKey                 crypto.PrivKey
+	network                 network.Network
+	ctx                     context.Context
+	ids                     identify.IDService
+	eventbus                event.Bus
+	cmgr                    connmgr.ConnManager
+	mux                     *msmux.MultistreamMuxer[protocol.ID]
+	psManager               *pstoremanager.PeerstoreManager
+	pings                   *ping.PingService
+	hps                     *holepunch.Service
+	relayManager            *relaysvc.RelayManager
+	AddrsFactory            AddrsFactory
+	ctxCancel               context.CancelFunc
+	maResolver              *madns.Resolver
+	addrChangeChan          chan struct{}
+	filteredInterfaceAddrs  []ma.Multiaddr
+	allInterfaceAddrs       []ma.Multiaddr
+	refCount                sync.WaitGroup
+	negtimeout              time.Duration
+	addrMu                  sync.RWMutex
+	closeSync               sync.Once
+	disableSignedPeerRecord bool
 }
 
 var _ host.Host = (*BasicHost)(nil)
@@ -108,58 +98,23 @@ var _ host.Host = (*BasicHost)(nil)
 // HostOpts holds options that can be passed to NewHost in order to
 // customize construction of the *BasicHost.
 type HostOpts struct {
-	// EventBus sets the event bus. Will construct a new event bus if omitted.
-	EventBus event.Bus
-
-	// MultistreamMuxer is essential for the *BasicHost and will use a sensible default value if omitted.
-	MultistreamMuxer *msmux.MultistreamMuxer[protocol.ID]
-
-	// NegotiationTimeout determines the read and write timeouts on streams.
-	// If 0 or omitted, it will use DefaultNegotiationTimeout.
-	// If below 0, timeouts on streams will be deactivated.
-	NegotiationTimeout time.Duration
-
-	// AddrsFactory holds a function which can be used to override or filter the result of Addrs.
-	// If omitted, there's no override or filtering, and the results of Addrs and AllAddrs are the same.
-	AddrsFactory AddrsFactory
-
-	// MultiaddrResolves holds the go-multiaddr-dns.Resolver used for resolving
-	// /dns4, /dns6, and /dnsaddr addresses before trying to connect to a peer.
-	MultiaddrResolver *madns.Resolver
-
-	// NATManager takes care of setting NAT port mappings, and discovering external addresses.
-	// If omitted, this will simply be disabled.
-	NATManager func(network.Network) NATManager
-
-	// ConnManager is a libp2p connection manager
-	ConnManager connmgr.ConnManager
-
-	// EnablePing indicates whether to instantiate the ping service
-	EnablePing bool
-
-	// EnableRelayService enables the circuit v2 relay (if we're publicly reachable).
-	EnableRelayService bool
-	// RelayServiceOpts are options for the circuit v2 relay.
-	RelayServiceOpts []relayv2.Option
-
-	// UserAgent sets the user-agent for the host.
-	UserAgent string
-
-	// ProtocolVersion sets the protocol version for the host.
-	ProtocolVersion string
-
-	// DisableSignedPeerRecord disables the generation of Signed Peer Records on this host.
+	ConnManager             connmgr.ConnManager
+	PrometheusRegisterer    prometheus.Registerer
+	EventBus                event.Bus
+	MultistreamMuxer        *msmux.MultistreamMuxer[protocol.ID]
+	AddrsFactory            AddrsFactory
+	MultiaddrResolver       *madns.Resolver
+	NATManager              func(network.Network) NATManager
+	UserAgent               string
+	ProtocolVersion         string
+	HolePunchingOptions     []holepunch.Option
+	RelayServiceOpts        []relayv2.Option
+	NegotiationTimeout      time.Duration
+	EnableRelayService      bool
+	EnableHolePunching      bool
 	DisableSignedPeerRecord bool
-
-	// EnableHolePunching enables the peer to initiate/respond to hole punching attempts for NAT traversal.
-	EnableHolePunching bool
-	// HolePunchingOptions are options for the hole punching service
-	HolePunchingOptions []holepunch.Option
-
-	// EnableMetrics enables the metrics subsystems
-	EnableMetrics bool
-	// PrometheusRegisterer is the PrometheusRegisterer used for metrics
-	PrometheusRegisterer prometheus.Registerer
+	EnableMetrics           bool
+	EnablePing              bool
 }
 
 // NewHost constructs a new *BasicHost and activates it by attaching its stream and connection handlers to the given inet.Network.

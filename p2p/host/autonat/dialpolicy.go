@@ -10,8 +10,8 @@ import (
 )
 
 type dialPolicy struct {
-	allowSelfDials bool
 	host           host.Host
+	allowSelfDials bool
 }
 
 // skipDial indicates that a multiaddress isn't worth attempted dialing.
